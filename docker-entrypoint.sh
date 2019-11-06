@@ -66,7 +66,7 @@ if [ "${ESTAFETTE_EXTENSION_VALUES}" != "" ]; then
 fi
 setvalues=""
 for v in "${values[@]}"; do
-    setvalues="--set $v "
+    setvalues+="--set $v "
 done
 
 case $ESTAFETTE_EXTENSION_ACTION in
@@ -93,6 +93,11 @@ test)
     kubectl -n kube-system create serviceaccount tiller
     kubectl create clusterrolebinding tiller --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
     helm init --service-account tiller --wait
+
+    if [ "${setvalues}" != "" ]; then
+        echo "Using following arguments for setting values:"
+        echo "'${setvalues}'"
+    fi
 
     echo "Showing template to be installed..."
     helm template --name $chart $chart-$version.tgz $setvalues
