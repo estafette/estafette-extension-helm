@@ -1,4 +1,4 @@
-# estafette-extension-helm
+# extensions/helm
 This extension helps with linting, packaging, testing and adding Helm charts to repositories
 
 ## Parameters
