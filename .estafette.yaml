@@ -37,7 +37,6 @@ stages:
       ENTRYPOINT ["/docker-entrypoint.sh"]
     repositories:
     - extensions
-    path: ./publish
 
   push-to-docker-hub:
     image: extensions/docker:dev
