@@ -108,5 +108,6 @@ publish)
     ;;
 *)
     echo "Action '$ESTAFETTE_EXTENSION_ACTION' is not supported; please use action parameter value 'lint','package','test' or 'publish'"
+    exit 1
     ;;
 esac
