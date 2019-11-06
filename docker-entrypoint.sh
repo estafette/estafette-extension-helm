@@ -120,7 +120,7 @@ publish)
     cd ${repodir}
 
     printf "\nGenerating/updating index file for repository $repourl...\n"
-    helm repo index --url $repourl --merge index.yaml .
+    helm repo index --url $repourl .
 
     printf "\nPushing changes to repository...\n"
     git config --global user.email "bot@estafette.io"
