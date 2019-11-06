@@ -126,7 +126,7 @@ publish)
     git config --global user.email "bot@estafette.io"
     git config --global user.name "Estafette bot"
     git add --all
-    git commit --allow-empty -m "${version}"
+    git commit --allow-empty -m "${chart} v${version}"
     git push origin master
     ;;
 *)
