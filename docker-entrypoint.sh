@@ -83,29 +83,29 @@ package)
 test)
     echo "Testing chart $chart with app version $appversion and version $version on kind host $kindhost..."
 
-    echo "Waiting for kind host to be ready..."
+    printf "\nWaiting for kind host to be ready...\n"
     while true; do
         wget -T 1 -c http://${kindhost}:10080/kubernetes-ready && break
     done
 
-    echo "Preparing kind host for using Helm..."
+    printf "\nPreparing kind host for using Helm...\n"
     wget -q -O - http://${kindhost}:10080/config | sed -e "s/localhost/${kindhost}/" > ~/.kube/config
     kubectl -n kube-system create serviceaccount tiller
     kubectl create clusterrolebinding tiller --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
     helm init --service-account tiller --wait
 
     if [ "${setvalues}" != "" ]; then
-        echo "Using following arguments for setting values:"
+        printf "Using following arguments for setting values:"
         echo "'${setvalues}'"
     fi
 
-    echo "Showing template to be installed..."
+    printf "\nShowing template to be installed...\n"
     helm template --name $chart $chart-$version.tgz $setvalues
     
-    echo "Installing chart and waiting for ${timeout}s for it to be ready..."
+    printf "\nInstalling chart and waiting for ${timeout}s for it to be ready...\n"
     helm upgrade --install $chart $chart-$version.tgz $setvalues --wait --timeout $timeout || (kubectl logs -l app.kubernetes.io/name=${chart},app.kubernetes.io/instance=${chart} && exit 1)
 
-    echo "Showing logs for container..."
+    printf "\nShowing logs for container...\n"
     kubectl logs -l app.kubernetes.io/name=${chart},app.kubernetes.io/instance=${chart}
 
     break
@@ -116,17 +116,17 @@ publish)
     mkdir -p ${repodir}/${chartssubdir}
 
     if [ "$purgeprerelease" == "true" ]; then
-        echo "Purging prerelease packages for chart $chart..."
+        printf "\nPurging prerelease packages for chart $chart...\n"
         rm -f "${repodir}/${chartssubdir}/${chart}-*-pre-*.tgz"
     fi
 
     cp *.tgz ${repodir}/${chartssubdir}
     cd ${repodir}
 
-    echo "Generating/updating index file for repository $repourl..."
+    printf "\nGenerating/updating index file for repository $repourl...\n"
     helm repo index --url $repourl --merge index.yaml .
 
-    echo "Pushing changes to repository..."
+    printf "\nPushing changes to repository...\n"
     git config --global user.email "bot@estafette.io"
     git config --global user.name "Estafette bot"
     git add --all
