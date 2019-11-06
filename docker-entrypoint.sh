@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
 echo "Starting estafette-extension-helm version ${VERSION}..."
@@ -60,6 +60,15 @@ if [ "${ESTAFETTE_EXTENSION_PURGE_PRERELEASE}" != "" ]; then
     purgeprerelease="${ESTAFETTE_EXTENSION_PURGE_PRERELEASE}"
 fi
 
+values=()
+if [ "${ESTAFETTE_EXTENSION_VALUES}" != "" ]; then
+    IFS=',' read -r -a values <<< "${ESTAFETTE_EXTENSION_VALUES}"
+fi
+setvalues=""
+for v in "${values[@]}"; do
+    setvalues="--set $v "
+done
+
 case $ESTAFETTE_EXTENSION_ACTION in
 lint)
     echo "Linting chart $chart..."
@@ -89,7 +98,7 @@ test)
     helm template --name $chart $chart-$version.tgz
     
     echo "Installing chart and waiting for ${timeout}s for it to be ready..."
-    helm upgrade --install $chart $chart-$version.tgz --wait --timeout $timeout || (kubectl logs -l app.kubernetes.io/name=${chart},app.kubernetes.io/instance=${chart} && exit 1)
+    helm upgrade --install $chart $chart-$version.tgz $setvalues --wait --timeout $timeout || (kubectl logs -l app.kubernetes.io/name=${chart},app.kubernetes.io/instance=${chart} && exit 1)
 
     echo "Showing logs for container..."
     kubectl logs -l app.kubernetes.io/name=${chart},app.kubernetes.io/instance=${chart}
