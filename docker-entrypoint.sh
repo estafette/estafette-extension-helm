@@ -95,7 +95,7 @@ test)
     helm init --service-account tiller --wait
 
     echo "Showing template to be installed..."
-    helm template --name $chart $chart-$version.tgz
+    helm template --name $chart $chart-$version.tgz $setvalues
     
     echo "Installing chart and waiting for ${timeout}s for it to be ready..."
     helm upgrade --install $chart $chart-$version.tgz $setvalues --wait --timeout $timeout || (kubectl logs -l app.kubernetes.io/name=${chart},app.kubernetes.io/instance=${chart} && exit 1)
