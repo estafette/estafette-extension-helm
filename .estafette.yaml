@@ -33,6 +33,7 @@ stages:
           && mkdir -p ~/.kube
 
       COPY docker-entrypoint.sh /
+      RUN chmod 500 /docker-entrypoint.sh
 
       ENTRYPOINT ["/docker-entrypoint.sh"]
     repositories:
