@@ -84,7 +84,7 @@ In order to publish to a git repository you first need to clone that git reposit
 
 ### Release
 
-When you want to release a package as a regular version you can drop the `prerelease: true` parameter and run actions `package` and `publish` like below:
+When you want to release a package as a final version (not pre-release) you can drop the `prerelease: true` parameter and run actions `package` and `publish` like below:
 
 ```yaml
 releases:
