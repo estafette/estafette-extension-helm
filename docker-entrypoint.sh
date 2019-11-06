@@ -73,12 +73,10 @@ case $ESTAFETTE_EXTENSION_ACTION in
 lint)
     echo "Linting chart $chart..."
     helm lint $chart
-    break
     ;;
 package)
     echo "Packaging chart $chart with app version $appversion and version $version..."
     helm package --save=false --app-version $appversion --version $version $chart
-    break
     ;;
 test)
     echo "Testing chart $chart with app version $appversion and version $version on kind host $kindhost..."
@@ -107,8 +105,6 @@ test)
 
     printf "\nShowing logs for container...\n"
     kubectl logs -l app.kubernetes.io/name=${chart},app.kubernetes.io/instance=${chart}
-
-    break
     ;;
 publish)
     echo "Publishing chart $chart with app version $appversion and version $version..."
@@ -132,8 +128,6 @@ publish)
     git add --all
     git commit --allow-empty -m "${version}"
     git push origin master
-
-    break
     ;;
 *)
     echo "Action '$ESTAFETTE_EXTENSION_ACTION' is not supported; please use action parameter value 'lint','package','test' or 'publish'"
