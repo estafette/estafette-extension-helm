@@ -55,6 +55,11 @@ if [ "${ESTAFETTE_EXTENSION_REPO_URL}" != "" ]; then
     repourl="${ESTAFETTE_EXTENSION_REPO_URL}"
 fi
 
+purgeprerelease="false"
+if [ "${ESTAFETTE_EXTENSION_PURGE_PRERELEASE}" != "" ]; then
+    purgeprerelease="${ESTAFETTE_EXTENSION_PURGE_PRERELEASE}"
+fi
+
 case $ESTAFETTE_EXTENSION_ACTION in
 lint)
     echo "Linting chart $chart..."
@@ -81,7 +86,7 @@ test)
     helm init --service-account tiller --wait
 
     echo "Showing template to be installed..."
-    helm template --name ${ESTAFETTE_GIT_NAME} ${ESTAFETTE_GIT_NAME}-${ESTAFETTE_BUILD_VERSION_MAJOR}.${ESTAFETTE_BUILD_VERSION_MINOR}.0-pre-${ESTAFETTE_BUILD_VERSION_PATCH}.tgz --namespace estafette
+    helm template --name $chart $chart-$version.tgz
     
     echo "Installing chart and waiting for ${timeout}s for it to be ready..."
     helm upgrade --install $chart $chart-$version.tgz --wait --timeout $timeout || (kubectl logs -l app.kubernetes.io/name=${chart},app.kubernetes.io/instance=${chart} && exit 1)
@@ -95,9 +100,19 @@ publish)
     echo "Publishing chart $chart with app version $appversion and version $version..."
 
     mkdir -p ${repodir}/${chartssubdir}
+
+    if [ "$purgeprerelease" == "true" ]; then
+        echo "Purging prerelease packages for chart $chart..."
+        rm -f "${repodir}/${chartssubdir}/${chart}-*-pre-*.tgz"
+    fi
+
     cp *.tgz ${repodir}/${chartssubdir}
     cd ${repodir}
+
+    echo "Generating/updating index file for repository $repourl..."
     helm repo index --url $repourl --merge index.yaml .
+
+    echo "Pushing changes to repository..."
     git config --global user.email "bot@estafette.io"
     git config --global user.name "Estafette bot"
     git add --all
