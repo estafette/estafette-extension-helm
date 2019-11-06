@@ -1,0 +1,113 @@
+builder:
+  track: dev
+
+labels:
+  app-group: estafette-ci-extensions
+  team: estafette-team
+  language: bash
+
+version:
+  semver:
+    major: 0
+    minor: 1
+
+stages:
+  bake:
+    image: extensions/docker:dev
+    action: build
+    container: helm
+    inline: |
+      FROM alpine/helm:2.15.1
+
+      LABEL maintainer="estafette.io" \
+            description="The ${ESTAFETTE_GIT_NAME} component is an Estafette extension to with linting, packaging, testing and adding Helm charts to repositories"
+
+      ENV VERSION="${ESTAFETTE_BUILD_VERSION}"
+
+      RUN apk add --update --no-cache \
+            git \
+            sed \
+          && rm -rf /var/cache/apk/* \
+          && wget -O /usr/local/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.15.1/bin/linux/amd64/kubectl \
+          && chmod +x /usr/local/bin/kubectl \
+          && mkdir -p ~/.kube
+
+      COPY docker-entrypoint.sh /
+
+      ENTRYPOINT ["/docker-entrypoint.sh"]
+    repositories:
+    - extensions
+    path: ./publish
+
+  push-to-docker-hub:
+    image: extensions/docker:dev
+    action: push
+    container: helm
+    repositories:
+    - extensions
+
+  slack-notify:
+    image: extensions/slack-build-status:dev
+    workspace: estafette
+    channels:
+    - '#build-status'
+    when:
+      status == 'succeeded' ||
+      status == 'failed'
+
+releases:
+  dev:
+    triggers:
+    - pipeline:
+        name: self
+        branch: .+
+    stages:
+      tag-container-image:
+        image: extensions/docker:dev
+        action: tag
+        container: helm
+        repositories:
+        - extensions
+        tags:
+        - dev
+
+  beta:
+    stages:
+      tag-container-image:
+        image: extensions/docker:dev
+        action: tag
+        container: helm
+        repositories:
+        - extensions
+        tags:
+        - beta
+
+      slack-notify:
+        image: extensions/slack-build-status:dev
+        workspace: estafette
+        channels:
+        - '#build-status'
+        when:
+          status == 'succeeded' ||
+          status == 'failed'
+
+  stable:
+    stages:
+      tag-container-image:
+        image: extensions/docker:dev
+        action: tag
+        container: helm
+        repositories:
+        - extensions
+        tags:
+        - stable
+        - latest
+
+      slack-notify:
+        image: extensions/slack-build-status:dev
+        workspace: estafette
+        channels:
+        - '#build-status'
+        when:
+          status == 'succeeded' ||
+          status == 'failed'
