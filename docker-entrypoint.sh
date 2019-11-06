@@ -113,7 +113,7 @@ publish)
 
     if [ "$purgeprerelease" == "true" ]; then
         printf "\nPurging prerelease packages for chart $chart...\n"
-        rm -f "${repodir}/${chartssubdir}/${chart}-*-pre-*.tgz"
+        rm -f ${repodir}/${chartssubdir}/${chart}-*-pre-*.tgz
     fi
 
     cp *.tgz ${repodir}/${chartssubdir}
