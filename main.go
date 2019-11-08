@@ -146,7 +146,10 @@ func main() {
 			log.Fatalf("Failed globbing %v; %v", filesGlob, err)
 		}
 		runCommand("cp %v %v/%v", strings.Join(files, " "), params.RepositoryDirectory, params.ChartsSubdirectory)
-		runCommand("cd %v", params.RepositoryDirectory)
+		err = os.Chdir(params.RepositoryDirectory)
+		if err != nil {
+			log.Fatalf("Failed changing directory to %v; %v", params.RepositoryDirectory, err)
+		}
 
 		log.Printf("\nGenerating/updating index file for repository %v...\n", params.ChartsRepositoryURL)
 		runCommand("helm repo index --url %v .", params.ChartsRepositoryURL)
@@ -162,7 +165,11 @@ func main() {
 		log.Printf("Purging pre-release version for chart %v with versions '%v-.+'...", params.Chart, params.Version)
 
 		runCommand("mkdir -p %v/%v", params.RepositoryDirectory, params.ChartsSubdirectory)
-		runCommand("cd %v", params.RepositoryDirectory)
+		err = os.Chdir(params.RepositoryDirectory)
+		if err != nil {
+			log.Fatalf("Failed changing directory to %v; %v", params.RepositoryDirectory, err)
+		}
+
 		filesGlob := fmt.Sprintf("%v/%v/%v-%v-*.tgz", params.RepositoryDirectory, params.ChartsSubdirectory, params.Chart, params.Version)
 		files, err := filepath.Glob(filesGlob)
 		if err != nil {
