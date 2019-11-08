@@ -140,16 +140,16 @@ func main() {
 		log.Printf("Publishing chart %v with app version %v and version %v...", params.Chart, params.AppVersion, params.Version)
 
 		runCommand("mkdir -p %v/%v", params.RepositoryDirectory, params.ChartsSubdirectory)
-		filesGlob := "*.tgz"
-		files, err := filepath.Glob(filesGlob)
-		if err != nil {
-			log.Fatalf("Failed globbing %v; %v", filesGlob, err)
-		}
-		runCommand("cp %v %v/%v", strings.Join(files, " "), params.RepositoryDirectory, params.ChartsSubdirectory)
+		runCommand("cp %v-%v.tgz %v/%v", params.Chart, params.Version, params.RepositoryDirectory, params.ChartsSubdirectory)
 		err = os.Chdir(params.RepositoryDirectory)
 		if err != nil {
 			log.Fatalf("Failed changing directory to %v; %v", params.RepositoryDirectory, err)
 		}
+		dir, err := os.Getwd()
+		if err != nil {
+			log.Fatal(err)
+		}
+		fmt.Println(dir)
 
 		log.Printf("\nGenerating/updating index file for repository %v...\n", params.ChartsRepositoryURL)
 		runCommand("helm repo index --url %v .", params.ChartsRepositoryURL)
@@ -158,7 +158,7 @@ func main() {
 		runCommand("git config --global user.email 'bot@estafette.io'")
 		runCommand("git config --global user.name 'Estafette bot'")
 		runCommand("git add --all")
-		runCommand("git commit --allow-empty -m '%v v%v'", params.Chart, params.Version)
+		runCommand("git commit --allow-empty -m \"%v v%v\"", params.Chart, params.Version)
 		runCommand("git push origin master")
 
 	case "purge":
@@ -184,7 +184,7 @@ func main() {
 		runCommand("git config --global user.email 'bot@estafette.io'")
 		runCommand("git config --global user.name 'Estafette bot'")
 		runCommand("git add --all")
-		runCommand("git commit --allow-empty -m 'purged %v v%v-.+'", params.Chart, params.Version)
+		runCommand("git commit --allow-empty -m \"purged %v v%v-.+\"", params.Chart, params.Version)
 		runCommand("git push origin master")
 
 	case "install":
