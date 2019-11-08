@@ -122,7 +122,7 @@ func main() {
 		}
 
 		log.Printf("\nShowing template to be installed...\n")
-		runCommand("helm diff upgrade %v %v-%v.tgz %v %v", params.Chart, params.Chart, params.Version, filesParameter)
+		runCommand("helm diff upgrade %v %v-%v.tgz %v", params.Chart, params.Chart, params.Version, filesParameter)
 
 		log.Printf("\nInstalling chart and waiting for %vs for it to be ready...\n", params.Timeout)
 		err = runCommandExtended("helm upgrade --install %v %v-%v.tgz %v --wait --timeout %v", params.Chart, params.Chart, params.Version, filesParameter, params.Timeout)
