@@ -12,20 +12,12 @@ if [ "${ESTAFETTE_EXTENSION_CHART}" != "" ]; then
     chart="${ESTAFETTE_EXTENSION_CHART}"
 fi
 
-prerelease="false"
-if [ "${ESTAFETTE_EXTENSION_PRERELEASE}" != "" ]; then
-    prerelease="${ESTAFETTE_EXTENSION_PRERELEASE}"
-fi
-
 appversion="${ESTAFETTE_BUILD_VERSION}"
 if [ "${ESTAFETTE_EXTENSION_APP_VERSION}" != "" ]; then
     appversion="${ESTAFETTE_EXTENSION_APP_VERSION}"
 fi
 
-version="${ESTAFETTE_BUILD_VERSION_MAJOR}.${ESTAFETTE_BUILD_VERSION_MINOR}.0"
-if [ "$prerelease" == "true" ]; then
-    version="${ESTAFETTE_BUILD_VERSION_MAJOR}.${ESTAFETTE_BUILD_VERSION_MINOR}.0-pre-${ESTAFETTE_BUILD_VERSION_PATCH}"
-fi
+version="${ESTAFETTE_BUILD_VERSION}"
 if [ "${ESTAFETTE_EXTENSION_VERSION}" != "" ]; then
     version="${ESTAFETTE_EXTENSION_VERSION}"
 fi
@@ -113,7 +105,7 @@ publish)
 
     if [ "$purgeprerelease" == "true" ]; then
         printf "\nPurging prerelease packages for chart $chart...\n"
-        rm -f ${repodir}/${chartssubdir}/${chart}-*-pre-*.tgz
+        rm -f ${repodir}/${chartssubdir}/${chart}-${version}-*.tgz
     fi
 
     cp *.tgz ${repodir}/${chartssubdir}
