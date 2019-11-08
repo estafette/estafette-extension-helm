@@ -4,7 +4,7 @@ builder:
 labels:
   app-group: estafette-ci-extensions
   team: estafette-team
-  language: bash
+  language: golang
 
 version:
   semver:
@@ -12,6 +12,16 @@ version:
     minor: 1
 
 stages:
+  build:
+    image: golang:1.13.4-alpine3.10
+    env:
+      CGO_ENABLED: 0
+      GOOS: linux
+      GOGC: off
+    commands:
+    - go test ./...
+    - go build -a -installsuffix cgo -ldflags "-X main.appgroup=${ESTAFETTE_LABEL_APP_GROUP} -X main.app=${ESTAFETTE_GIT_NAME} -X main.version=${ESTAFETTE_BUILD_VERSION} -X main.revision=${ESTAFETTE_GIT_REVISION} -X main.branch=${ESTAFETTE_GIT_BRANCH} -X main.buildDate=${ESTAFETTE_BUILD_DATETIME}" -o ./publish/${ESTAFETTE_GIT_NAME} .
+
   bake:
     image: extensions/docker:dev
     action: build
@@ -26,19 +36,17 @@ stages:
 
       RUN apk add --update --no-cache \
             git \
-            sed \
-            bash \
           && rm -rf /var/cache/apk/* \
           && wget -O /usr/local/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.15.1/bin/linux/amd64/kubectl \
           && chmod +x /usr/local/bin/kubectl \
           && mkdir -p ~/.kube
 
-      COPY docker-entrypoint.sh /
-      RUN chmod 500 /docker-entrypoint.sh
+      COPY ${ESTAFETTE_GIT_NAME} /
 
-      ENTRYPOINT ["/docker-entrypoint.sh"]
+      ENTRYPOINT ["/${ESTAFETTE_GIT_NAME}"]
     repositories:
     - extensions
+    path: ./publish
 
   push-to-docker-hub:
     image: extensions/docker:dev
