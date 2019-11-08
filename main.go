@@ -48,6 +48,7 @@ func main() {
 	log.Printf("Starting % version %v...", app, version)
 
 	log.Printf("Unmarshalling parameters / custom properties...")
+	log.Println(*paramsYAML)
 	var params params
 	err := yaml.Unmarshal([]byte(*paramsYAML), &params)
 	if err != nil {
@@ -197,7 +198,7 @@ func runCommandExtended(command string, args ...interface{}) error {
 		a = commandArray[1:]
 	}
 
-	log.Printf("Running command '%v %v'...", c, strings.Join(a, " "))
+	log.Printf("> %v %v", c, strings.Join(a, " "))
 	cmd := exec.Command(c, a...)
 	cmd.Dir = "/estafette-work"
 	cmd.Stdout = os.Stdout

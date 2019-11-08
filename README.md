@@ -7,16 +7,14 @@ This extension helps with linting, packaging, testing and adding Helm charts to 
 | Parameter         | Type     | Values |
 | ----------------- | -------- | ------ |
 | `chart`           | string   | The name of the chart and subdirectory where the chart is stored; defaults to `$ESTAFETTE_LABEL_APP` or `$ESTAFETTE_GIT_NAME` in that order |
-| `prerelease`      | bool     | Can be set to create a pre-release package; defaults to false                                                                               |
-| `appVersion`      | string   | Can be used to override the app version; defaults to `ESTAFETTE_BUILD_VERSION`                                                              |
-| `version`         | string   | Can be used to override the package version; defauls to `${ESTAFETTE_BUILD_VERSION_MAJOR}.${ESTAFETTE_BUILD_VERSION_MINOR}.0` for release packages and `${ESTAFETTE_BUILD_VERSION_MAJOR}.${ESTAFETTE_BUILD_VERSION_MINOR}.0-pre-${ESTAFETTE_BUILD_VERSION_PATCH}` for pre-release packages |
+| `appVersion`      | string   | Can be used to override the app version; defaults to `$ESTAFETTE_BUILD_VERSION`                                                             |
+| `version`         | string   | Can be used to override the package version; defauls to `$ESTAFETTE_BUILD_VERSION`                                                          |
 | `kindHost`        | string   | The service container name running the [bsycorp/kind](https://hub.docker.com/r/bsycorp/kind) container to run tests against                 |
 | `timeout`         | int      | The time in seconds to wait for install during the `test` action to finish; defaults to 200 seconds                                         |
 | `repoDir`         | string   | The directory into which the chart repository is cloned; defaults to `helm-charts`                                                          |
 | `chartsSubdir`    | string   | The subdirectory of the chart repository into which the tgz files are copied; defaults to `charts`                                          |
 | `repoUrl`         | string   | The full url towards the helm repository, to be used to generate the `index.yaml` file; defaults to `https://helm.estafette.io/`            |
-| `purgePrerelease` | bool     | Can be set to purge pre-release packages during the `publish` action; this will delete all pre-release packages for this chart from the chart repository |
-| `values`          | []string | Array of values to pass to the install command during the `test` action in order to set required values                                     |
+| `values`          | string   | Contents of a values.yaml files to use with the install command during the `test` action in order to set required values                    |
 
 ## Usage
 
@@ -28,7 +26,6 @@ In order to use this extension in your `.estafette.yaml` manifest for the variou
   lint-helm-chart:
     image: extensions/helm:stable
     action: lint
-    prerelease: true
 ```
 
 ### Packaging
@@ -37,7 +34,6 @@ In order to use this extension in your `.estafette.yaml` manifest for the variou
   package-helm-chart:
     image: extensions/helm:stable
     action: package
-    prerelease: true
 ```
 
 ### Testing
@@ -57,15 +53,15 @@ Testing depends on Estafette's service containers to provide a Kubernetes enviro
           timeoutSeconds: 180
     image: extensions/helm:stable
     action: test
-    prerelease: true
-    values:
-    - secret.cloudflareApiEmail=bot@estafette.io
-    - secret.cloudflareApiKey=abc
+    values: |-
+      secret:
+        cloudflareApiEmail=bot@estafette.io
+        cloudflareApiKey=abc
 ```
 
 ### Publishing
 
-In order to publish to a git repository you first need to clone that git repository, then you can run
+In order to publish to a git repository you first need to clone that git repository and then run the `publish` action as follows:
 
 ```yaml
   clone-charts-repo:
@@ -77,31 +73,48 @@ In order to publish to a git repository you first need to clone that git reposit
   publish-helm-chart:
     image: extensions/helm:stable
     action: publish
-    prerelease: true
     repoDir: helm-charts
     chartsSubdir: charts
     repoUrl: https://helm.estafette.io/
 ```
 
-### Release
+### Release version
 
-When you want to release a package as a final version (not pre-release) you can drop the `prerelease: true` parameter and run actions `package` and `publish` like below:
+If you run the package and publish steps as shown above it will take the version coming from Estafette CI. If you're on a release branch it will drop the label from the version number, automatically leading to a release package.
+
+To ensure this only happens on the branch for your release version use the following snippet for defining your build version:
+
+```yaml
+version:
+  semver:
+    major: 1
+    minor: 2
+    patch: 1
+    labelTemplate: 'beta-{{auto}}'
+    releaseBranch: 1.2.1
+```
+
+This moves the autoincrementing build number from the `patch` field - which is default - to the label and with the `releaseBranch` set to the version you intend to release it will not build a release package until you create and push that branch.
+
+### Purge
+
+When releasing your final version you might want to purge the pre-release versions leading up to that moment. You can do sith with `action: purge`, for example in a release target. You'll have to clone the Helm chart repository first:
 
 ```yaml
 releases:
-  release:
-    clone: true
+  release-helm-chart:
     stages:
-      package-helm-chart:
-        image: extensions/helm:stable
-        action: package
-
       clone-charts-repo:
-        image: extensions/git-clone:dev
+        image: extensions/git-clone:stable
         repo: helm-charts
         branch: master
 
-      publish-helm-chart:
+      purge-prerelease-helm-charts:
         image: extensions/helm:stable
-        action: publish
+        action: purge
+
+      create-github-release:
+        image: extensions/github-release:stable
 ```
+
+Notice at the end it creates a Github release, for which it expects a milestone to be present with the title equal to `$ESTAFETTE_BUILD_VERSION`.
