@@ -7,6 +7,8 @@ import (
 	"net/http"
 	"os"
 	"os/exec"
+	"os/user"
+	"path/filepath"
 	"runtime"
 	"strings"
 	"time"
@@ -62,11 +64,11 @@ func main() {
 		runCommand("helm lint %v", params.Chart)
 
 	case "package":
-		log.Printf("Packaging chart $chart with app version %v and version %v...", params.AppVersion, params.Version)
+		log.Printf("Packaging chart %v with app version %v and version %v...", params.Chart, params.AppVersion, params.Version)
 		runCommand("helm package --save=false --app-version %v --version %v %v", params.AppVersion, params.Version, params.Chart)
 
 	case "test":
-		log.Printf("Testing chart $chart with app version $appversion and version $version on kind host $kindhost...")
+		log.Printf("Testing chart %v with app version %v and version %v on kind host %v...", params.Chart, params.AppVersion, params.Version, params.KindHost)
 
 		log.Printf("\nWaiting for kind host to be ready...\n")
 		httpClient := &http.Client{
@@ -96,7 +98,11 @@ func main() {
 			log.Fatalf("Failed to retrieve kind config from http://%v:10080/config; %v", params.KindHost, err)
 		}
 		kubeConfig := strings.ReplaceAll(string(body), "localhost", params.KindHost)
-		err = ioutil.WriteFile("~/.kube/config", []byte(kubeConfig), 0600)
+
+		usr, _ := user.Current()
+		homeDir := usr.HomeDir
+
+		err = ioutil.WriteFile(filepath.Join(homeDir, ".kube/config"), []byte(kubeConfig), 0644)
 		if err != nil {
 			log.Fatal("Failed writing ~/.kube/config: ", err)
 		}
@@ -113,7 +119,7 @@ func main() {
 		log.Printf("\nShowing template to be installed...\n")
 		runCommand("helm template --name %v %v-%v.tgz %v", params.Chart, params.Chart, params.Version, setParameters)
 
-		log.Printf("\nInstalling chart and waiting for ${timeout}s for it to be ready...\n")
+		log.Printf("\nInstalling chart and waiting for %vs for it to be ready...\n", params.Timeout)
 		err = runCommandExtended("helm upgrade --install %v %v-%v.tgz %v --wait --timeout %v", params.Chart, params.Chart, params.Version, setParameters, params.Timeout)
 		if err != nil {
 			log.Printf("Installation timed out, showing logs...")
@@ -125,13 +131,13 @@ func main() {
 		runCommand("kubectl logs -l app.kubernetes.io/name=%v,app.kubernetes.io/instance=%v", params.Chart, params.Chart)
 
 	case "publish":
-		log.Printf("Publishing chart $chart with app version $appversion and version $version...")
+		log.Printf("Publishing chart %v with app version %v and version %v...", params.Chart, params.AppVersion, params.Version)
 
 		runCommand("mkdir -p %v/%v", params.RepositoryDirectory, params.ChartsSubdirectory)
 		runCommand("cp *.tgz %v/%v", params.RepositoryDirectory, params.ChartsSubdirectory)
 		runCommand("cd %v", params.RepositoryDirectory)
 
-		log.Printf("\nGenerating/updating index file for repository $repourl...\n")
+		log.Printf("\nGenerating/updating index file for repository %v...\n", params.ChartsRepositoryURL)
 		runCommand("helm repo index --url %v .", params.ChartsRepositoryURL)
 
 		log.Printf("\nPushing changes to repository...\n")
@@ -141,24 +147,24 @@ func main() {
 		runCommand("git commit --allow-empty -m '%v v%v'", params.Chart, params.Version)
 		runCommand("git push origin master")
 	case "purge":
-		log.Printf("Purging pre-release version for chart $chart with versions '$version-.+'...")
+		log.Printf("Purging pre-release version for chart %v with versions '%v-.+'...", params.Chart, params.Version)
 
 		runCommand("mkdir -p %v/%v", params.RepositoryDirectory, params.ChartsSubdirectory)
 		runCommand("cd %v", params.RepositoryDirectory)
 		runCommand("rm -f %v/%v/%v-%v-*.tgz", params.RepositoryDirectory, params.ChartsSubdirectory, params.Chart, params.Version)
 
-		log.Printf("\nGenerating/updating index file for repository $repourl...\n")
+		log.Printf("\nGenerating/updating index file for repository %v...\n", params.ChartsRepositoryURL)
 		runCommand("helm repo index --url %v .", params.ChartsRepositoryURL)
 
 		log.Printf("\nPushing changes to repository...\n")
 		runCommand("git config --global user.email 'bot@estafette.io'")
 		runCommand("git config --global user.name 'Estafette bot'")
 		runCommand("git add --all")
-		runCommand("git commit --allow-empty -m 'purged ${chart} v${version}-.+'", params.Chart, params.Version)
+		runCommand("git commit --allow-empty -m 'purged %v v%v-.+'", params.Chart, params.Version)
 		runCommand("git push origin master")
 
 	default:
-		log.Fatal("Action '$ESTAFETTE_EXTENSION_ACTION' is not supported; please use action parameter value 'lint','package','test', 'publish' or 'purge'")
+		log.Fatalf("Action '%v' is not supported; please use action parameter value 'lint','package','test', 'publish' or 'purge'", params.Action)
 	}
 
 }
