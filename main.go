@@ -140,7 +140,12 @@ func main() {
 		log.Printf("Publishing chart %v with app version %v and version %v...", params.Chart, params.AppVersion, params.Version)
 
 		runCommand("mkdir -p %v/%v", params.RepositoryDirectory, params.ChartsSubdirectory)
-		runCommand("cp *.tgz %v/%v", params.RepositoryDirectory, params.ChartsSubdirectory)
+		filesGlob := "*.tgz"
+		files, err := filepath.Glob(filesGlob)
+		if err != nil {
+			log.Fatalf("Failed globbing %v; %v", filesGlob, err)
+		}
+		runCommand("cp %v %v/%v", strings.Join(files, " "), params.RepositoryDirectory, params.ChartsSubdirectory)
 		runCommand("cd %v", params.RepositoryDirectory)
 
 		log.Printf("\nGenerating/updating index file for repository %v...\n", params.ChartsRepositoryURL)
@@ -157,7 +162,12 @@ func main() {
 
 		runCommand("mkdir -p %v/%v", params.RepositoryDirectory, params.ChartsSubdirectory)
 		runCommand("cd %v", params.RepositoryDirectory)
-		runCommand("rm -f %v/%v/%v-%v-*.tgz", params.RepositoryDirectory, params.ChartsSubdirectory, params.Chart, params.Version)
+		filesGlob := fmt.Sprintf("%v/%v/%v-%v-*.tgz", params.RepositoryDirectory, params.ChartsSubdirectory, params.Chart, params.Version)
+		files, err := filepath.Glob(filesGlob)
+		if err != nil {
+			log.Fatalf("Failed globbing %v; %v", filesGlob, err)
+		}
+		runCommand("rm -f %v", strings.Join(files, " "))
 
 		log.Printf("\nGenerating/updating index file for repository %v...\n", params.ChartsRepositoryURL)
 		runCommand("helm repo index --url %v .", params.ChartsRepositoryURL)
