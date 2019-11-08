@@ -151,6 +151,7 @@ func main() {
 		log.Printf("\nPushing changes to repository...\n")
 		runCommandWithArgs("git", []string{"config", "--global", "user.email", "'bot@estafette.io'"})
 		runCommandWithArgs("git", []string{"config", "--global", "user.name", "'estafette-bot'"})
+		runCommand("git status")
 		runCommand("git add --all")
 		runCommandWithArgs("git", []string{"commit", "--allow-empty", "-m", fmt.Sprintf("'%v v%v'", params.Chart, params.Version)})
 		runCommand("git push origin master")
