@@ -47,11 +47,6 @@ if [ "${ESTAFETTE_EXTENSION_REPO_URL}" != "" ]; then
     repourl="${ESTAFETTE_EXTENSION_REPO_URL}"
 fi
 
-purgeprerelease="false"
-if [ "${ESTAFETTE_EXTENSION_PURGE_PRERELEASE}" != "" ]; then
-    purgeprerelease="${ESTAFETTE_EXTENSION_PURGE_PRERELEASE}"
-fi
-
 values=()
 if [ "${ESTAFETTE_EXTENSION_VALUES}" != "" ]; then
     IFS=',' read -r -a values <<< "${ESTAFETTE_EXTENSION_VALUES}"
@@ -103,11 +98,6 @@ publish)
 
     mkdir -p ${repodir}/${chartssubdir}
 
-    if [ "$purgeprerelease" == "true" ]; then
-        printf "\nPurging prerelease packages for chart $chart...\n"
-        rm -f ${repodir}/${chartssubdir}/${chart}-${version}-*.tgz
-    fi
-
     cp *.tgz ${repodir}/${chartssubdir}
     cd ${repodir}
 
@@ -119,6 +109,25 @@ publish)
     git config --global user.name "Estafette bot"
     git add --all
     git commit --allow-empty -m "${chart} v${version}"
+    git push origin master
+    ;;
+purge)
+    echo "Purging pre-release version for chart $chart with versions '$version-.+'..."
+
+    mkdir -p ${repodir}/${chartssubdir}
+
+    cd ${repodir}
+
+    rm -f ${repodir}/${chartssubdir}/${chart}-${version}-*.tgz
+
+    printf "\nGenerating/updating index file for repository $repourl...\n"
+    helm repo index --url $repourl .
+
+    printf "\nPushing changes to repository...\n"
+    git config --global user.email "bot@estafette.io"
+    git config --global user.name "Estafette bot"
+    git add --all
+    git commit --allow-empty -m "purged ${chart} v${version}-.+"
     git push origin master
     ;;
 *)
