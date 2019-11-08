@@ -17,7 +17,7 @@ stages:
     action: build
     container: helm
     inline: |
-      FROM alpine/helm:2.15.2
+      FROM alpine/helm:2.16.0
 
       LABEL maintainer="estafette.io" \
             description="The ${ESTAFETTE_GIT_NAME} component is an Estafette extension to with linting, packaging, testing and adding Helm charts to repositories"
