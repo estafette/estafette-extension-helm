@@ -242,12 +242,6 @@ func runCommandExtended(command string, args ...interface{}) error {
 
 	log.Printf("> %v %v", c, strings.Join(a, " "))
 	cmd := exec.Command(c, a...)
-	dir, err := os.Getwd()
-	if err != nil {
-		log.Printf("Warning - can't get working directory, defaulting to /estafette-work; %v", err)
-	} else {
-		cmd.Dir = dir
-	}
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
@@ -262,15 +256,8 @@ func runCommandWithArgs(command string, args []string) {
 func runCommandWithArgsExtended(command string, args []string) error {
 	log.Printf("> %v %v", command, strings.Join(args, " "))
 	cmd := exec.Command(command, args...)
-	cmd.Dir = "/estafette-work"
-	dir, err := os.Getwd()
-	if err != nil {
-		log.Printf("Warning - can't get working directory, defaulting to /estafette-work; %v", err)
-	} else {
-		cmd.Dir = dir
-	}
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	err = cmd.Run()
+	err := cmd.Run()
 	return err
 }
