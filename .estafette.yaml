@@ -40,7 +40,7 @@ stages:
           && wget -O /usr/local/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/v1.15.1/bin/linux/amd64/kubectl \
           && chmod +x /usr/local/bin/kubectl \
           && mkdir -p ~/.kube ~/.helm/plugins \
-          && helm plugin install https://github.com/databus23/helm-diff --version v2.11.0+5
+          && helm plugin install https://github.com/databus23/helm-diff --version master
 
       COPY ${ESTAFETTE_GIT_NAME} /
 
