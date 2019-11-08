@@ -157,6 +157,7 @@ func main() {
 		runCommand("git add --all")
 		runCommand("git commit --allow-empty -m '%v v%v'", params.Chart, params.Version)
 		runCommand("git push origin master")
+
 	case "purge":
 		log.Printf("Purging pre-release version for chart %v with versions '%v-.+'...", params.Chart, params.Version)
 
@@ -179,8 +180,37 @@ func main() {
 		runCommand("git commit --allow-empty -m 'purged %v v%v-.+'", params.Chart, params.Version)
 		runCommand("git push origin master")
 
+	case "install":
+		log.Printf("Install chart %v with app version %v and version %v...", params.Chart, params.AppVersion, params.Version)
+
+		// TODO get kube config for target to deploy to
+
+		filesParameter := ""
+		if params.Values != "" {
+			log.Printf("\nWriting values to values.yaml...\n")
+			err = ioutil.WriteFile("values.yaml", []byte(params.Values), 0644)
+			if err != nil {
+				log.Fatal("Failed writing values.yaml: ", err)
+			}
+			filesParameter = "-f values.yaml"
+			runCommand("cat values.yaml")
+		}
+
+		log.Printf("\nShowing template to be installed...\n")
+		runCommand("helm template --name %v %v-%v.tgz %v -n %v", params.ReleaseName, params.Chart, params.Version, filesParameter, params.Namespace)
+
+		log.Printf("\nInstalling chart and waiting for %vs for it to be ready...\n", params.Timeout)
+		err = runCommandExtended("helm upgrade --install %v %v-%v.tgz %v -n %v --wait --timeout %v", params.ReleaseName, params.Chart, params.Version, filesParameter, params.Namespace, params.Timeout)
+		if err != nil {
+			log.Printf("Installation timed out, showing logs...")
+			runCommand("kubectl logs -l app.kubernetes.io/name=%v,app.kubernetes.io/instance=%v,app.kubernetes.io/version=%v -n %v", params.Chart, params.ReleaseName, params.Version, params.Namespace)
+			os.Exit(1)
+		}
+
+		log.Printf("\nShowing logs for container...\n")
+		runCommand("kubectl logs -l app.kubernetes.io/name=%v,app.kubernetes.io/instance=%v,app.kubernetes.io/version=%v -n %v", params.Chart, params.ReleaseName, params.Version, params.Namespace)
 	default:
-		log.Fatalf("Action '%v' is not supported; please use action parameter value 'lint','package','test', 'publish' or 'purge'", params.Action)
+		log.Fatalf("Action '%v' is not supported; please use action parameter value 'lint','package','test', 'publish', 'install' or 'purge'", params.Action)
 	}
 
 }

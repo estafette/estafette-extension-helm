@@ -13,6 +13,8 @@ type params struct {
 	ChartsSubdirectory  string `json:"chartsSubdir,omitempty" yaml:"chartsSubdir,omitempty"`
 	ChartsRepositoryURL string `json:"repoUrl,omitempty" yaml:"repoUrl,omitempty"`
 	Values              string `json:"values,omitempty" yaml:"values,omitempty"`
+	ReleaseName         string `json:"release,omitempty" yaml:"release,omitempty"`
+	Namespace           string `json:"namespace,omitempty" yaml:"namespace,omitempty"`
 }
 
 func (p *params) SetDefaults(gitName string, appLabel string, buildVersion string) {
@@ -52,5 +54,9 @@ func (p *params) SetDefaults(gitName string, appLabel string, buildVersion strin
 
 	if p.ChartsRepositoryURL == "" {
 		p.ChartsRepositoryURL = "https://helm.estafette.io/"
+	}
+
+	if p.ReleaseName == "" {
+		p.ReleaseName = p.Chart
 	}
 }
