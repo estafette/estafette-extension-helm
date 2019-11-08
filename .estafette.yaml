@@ -45,6 +45,8 @@ stages:
 
       COPY ${ESTAFETTE_GIT_NAME} /
 
+      WORKDIR /estafette-work
+
       ENTRYPOINT ["/${ESTAFETTE_GIT_NAME}"]
     repositories:
     - extensions
