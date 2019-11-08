@@ -1,20 +1,18 @@
 package main
 
-import "fmt"
-
 var defaultTimeout = 120
 
 type params struct {
-	Action              string   `json:"action,omitempty" yaml:"action,omitempty"`
-	Chart               string   `json:"chart,omitempty" yaml:"chart,omitempty"`
-	AppVersion          string   `json:"appVersion,omitempty" yaml:"appVersion,omitempty"`
-	Version             string   `json:"version,omitempty" yaml:"version,omitempty"`
-	KindHost            string   `json:"kindHost,omitempty" yaml:"kindHost,omitempty"`
-	Timeout             *int     `json:"timeout,omitempty" yaml:"timeout,omitempty"`
-	RepositoryDirectory string   `json:"repoDir,omitempty" yaml:"repoDir,omitempty"`
-	ChartsSubdirectory  string   `json:"chartsSubdir,omitempty" yaml:"chartsSubdir,omitempty"`
-	ChartsRepositoryURL string   `json:"repoUrl,omitempty" yaml:"repoUrl,omitempty"`
-	Values              []string `json:"values,omitempty" yaml:"values,omitempty"`
+	Action              string `json:"action,omitempty" yaml:"action,omitempty"`
+	Chart               string `json:"chart,omitempty" yaml:"chart,omitempty"`
+	AppVersion          string `json:"appVersion,omitempty" yaml:"appVersion,omitempty"`
+	Version             string `json:"version,omitempty" yaml:"version,omitempty"`
+	KindHost            string `json:"kindHost,omitempty" yaml:"kindHost,omitempty"`
+	Timeout             *int   `json:"timeout,omitempty" yaml:"timeout,omitempty"`
+	RepositoryDirectory string `json:"repoDir,omitempty" yaml:"repoDir,omitempty"`
+	ChartsSubdirectory  string `json:"chartsSubdir,omitempty" yaml:"chartsSubdir,omitempty"`
+	ChartsRepositoryURL string `json:"repoUrl,omitempty" yaml:"repoUrl,omitempty"`
+	Values              string `json:"values,omitempty" yaml:"values,omitempty"`
 }
 
 func (p *params) SetDefaults(gitName string, appLabel string, buildVersion string) {
@@ -55,15 +53,4 @@ func (p *params) SetDefaults(gitName string, appLabel string, buildVersion strin
 	if p.ChartsRepositoryURL == "" {
 		p.ChartsRepositoryURL = "https://helm.estafette.io/"
 	}
-}
-
-func (p *params) GetSetParameters() string {
-	setParameters := ""
-	if len(p.Values) > 0 {
-		for _, v := range p.Values {
-			setParameters += fmt.Sprintf("--set %v", v)
-		}
-	}
-
-	return setParameters
 }

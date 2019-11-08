@@ -101,7 +101,6 @@ func main() {
 
 		usr, _ := user.Current()
 		homeDir := usr.HomeDir
-
 		err = ioutil.WriteFile(filepath.Join(homeDir, ".kube/config"), []byte(kubeConfig), 0644)
 		if err != nil {
 			log.Fatal("Failed writing ~/.kube/config: ", err)
@@ -111,16 +110,22 @@ func main() {
 		runCommand("kubectl create clusterrolebinding tiller --clusterrole=cluster-admin --serviceaccount=kube-system:tiller")
 		runCommand("helm init --service-account tiller --wait")
 
-		setParameters := params.GetSetParameters()
-		if setParameters != "" {
-			log.Printf("Using following arguments for setting values:\n%v", setParameters)
+		filesParameter := ""
+		if params.Values != "" {
+			log.Printf("\nWriting values to values.yaml...\n")
+			err = ioutil.WriteFile("values.yaml", []byte(params.Values), 0644)
+			if err != nil {
+				log.Fatal("Failed writing values.yaml: ", err)
+			}
+			filesParameter = "-f values.yaml"
+			runCommand("cat values.yaml")
 		}
 
 		log.Printf("\nShowing template to be installed...\n")
-		runCommand("helm template --name %v %v-%v.tgz %v", params.Chart, params.Chart, params.Version, setParameters)
+		runCommand("helm template --name %v %v-%v.tgz %v", params.Chart, params.Chart, params.Version, filesParameter)
 
 		log.Printf("\nInstalling chart and waiting for %vs for it to be ready...\n", params.Timeout)
-		err = runCommandExtended("helm upgrade --install %v %v-%v.tgz %v --wait --timeout %v", params.Chart, params.Chart, params.Version, setParameters, params.Timeout)
+		err = runCommandExtended("helm upgrade --install %v %v-%v.tgz %v --wait --timeout %v", params.Chart, params.Chart, params.Version, filesParameter, params.Timeout)
 		if err != nil {
 			log.Printf("Installation timed out, showing logs...")
 			runCommand("kubectl logs -l app.kubernetes.io/name=%v,app.kubernetes.io/instance=%v", params.Chart, params.Chart)
