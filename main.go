@@ -158,7 +158,7 @@ func main() {
 		runCommand("git config --global user.email 'bot@estafette.io'")
 		runCommand("git config --global user.name 'Estafette bot'")
 		runCommand("git add --all")
-		runCommand("git commit --allow-empty -m \"%v v%v\"", params.Chart, params.Version)
+		runCommandWithArgs("git", []string{"--allow-empty", "-m", fmt.Sprintf("'%v v%v'", params.Chart, params.Version)})
 		runCommand("git push origin master")
 
 	case "purge":
@@ -184,7 +184,7 @@ func main() {
 		runCommand("git config --global user.email 'bot@estafette.io'")
 		runCommand("git config --global user.name 'Estafette bot'")
 		runCommand("git add --all")
-		runCommand("git commit --allow-empty -m \"purged %v v%v-.+\"", params.Chart, params.Version)
+		runCommandWithArgs("git", []string{"--allow-empty", "-m", fmt.Sprintf("'purged %v v%v-.+'", params.Chart, params.Version)})
 		runCommand("git push origin master")
 
 	case "install":
@@ -247,6 +247,21 @@ func runCommandExtended(command string, args ...interface{}) error {
 
 	log.Printf("> %v %v", c, strings.Join(a, " "))
 	cmd := exec.Command(c, a...)
+	cmd.Dir = "/estafette-work"
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	err := cmd.Run()
+	return err
+}
+
+func runCommandWithArgs(command string, args []string) {
+	err := runCommandWithArgsExtended(command, args)
+	handleError(err)
+}
+
+func runCommandWithArgsExtended(command string, args []string) error {
+	log.Printf("> %v %v", command, strings.Join(args, " "))
+	cmd := exec.Command(command, args...)
 	cmd.Dir = "/estafette-work"
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
