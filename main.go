@@ -158,7 +158,7 @@ func main() {
 		runCommand("git config --global user.email 'bot@estafette.io'")
 		runCommand("git config --global user.name 'Estafette bot'")
 		runCommand("git add --all")
-		runCommandWithArgs("git", []string{"--allow-empty", "-m", fmt.Sprintf("'%v v%v'", params.Chart, params.Version)})
+		runCommandWithArgs("git", []string{"commit", "--allow-empty", "-m", fmt.Sprintf("'%v v%v'", params.Chart, params.Version)})
 		runCommand("git push origin master")
 
 	case "purge":
@@ -184,7 +184,7 @@ func main() {
 		runCommand("git config --global user.email 'bot@estafette.io'")
 		runCommand("git config --global user.name 'Estafette bot'")
 		runCommand("git add --all")
-		runCommandWithArgs("git", []string{"--allow-empty", "-m", fmt.Sprintf("'purged %v v%v-.+'", params.Chart, params.Version)})
+		runCommandWithArgs("git", []string{"commit", "--allow-empty", "-m", fmt.Sprintf("'purged %v v%v-.+'", params.Chart, params.Version)})
 		runCommand("git push origin master")
 
 	case "install":
