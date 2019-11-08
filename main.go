@@ -48,7 +48,6 @@ func main() {
 	log.Printf("Starting % version %v...", app, version)
 
 	log.Printf("Unmarshalling parameters / custom properties...")
-	log.Println(*paramsYAML)
 	var params params
 	err := yaml.Unmarshal([]byte(*paramsYAML), &params)
 	if err != nil {
@@ -123,7 +122,7 @@ func main() {
 		}
 
 		log.Printf("\nShowing template to be installed...\n")
-		runCommand("helm template --name %v %v-%v.tgz %v", params.Chart, params.Chart, params.Version, filesParameter)
+		runCommand("helm diff upgrade --install %v %v-%v.tgz %v %v", params.Chart, params.Chart, params.Version, filesParameter)
 
 		log.Printf("\nInstalling chart and waiting for %vs for it to be ready...\n", params.Timeout)
 		err = runCommandExtended("helm upgrade --install %v %v-%v.tgz %v --wait --timeout %v", params.Chart, params.Chart, params.Version, filesParameter, params.Timeout)
@@ -145,18 +144,13 @@ func main() {
 		if err != nil {
 			log.Fatalf("Failed changing directory to %v; %v", params.RepositoryDirectory, err)
 		}
-		dir, err := os.Getwd()
-		if err != nil {
-			log.Fatal(err)
-		}
-		fmt.Println(dir)
 
 		log.Printf("\nGenerating/updating index file for repository %v...\n", params.ChartsRepositoryURL)
 		runCommand("helm repo index --url %v .", params.ChartsRepositoryURL)
 
 		log.Printf("\nPushing changes to repository...\n")
-		runCommand("git config --global user.email 'bot@estafette.io'")
-		runCommand("git config --global user.name 'Estafette bot'")
+		runCommandWithArgs("git", []string{"config", "--global", "user.email", "'bot@estafette.io'"})
+		runCommandWithArgs("git", []string{"config", "--global", "user.name", "'estafette-bot'"})
 		runCommand("git add --all")
 		runCommandWithArgs("git", []string{"commit", "--allow-empty", "-m", fmt.Sprintf("'%v v%v'", params.Chart, params.Version)})
 		runCommand("git push origin master")
@@ -181,8 +175,8 @@ func main() {
 		runCommand("helm repo index --url %v .", params.ChartsRepositoryURL)
 
 		log.Printf("\nPushing changes to repository...\n")
-		runCommand("git config --global user.email 'bot@estafette.io'")
-		runCommand("git config --global user.name 'Estafette bot'")
+		runCommandWithArgs("git", []string{"config", "--global", "user.email", "'bot@estafette.io'"})
+		runCommandWithArgs("git", []string{"config", "--global", "user.name", "'estafette-bot'"})
 		runCommand("git add --all")
 		runCommandWithArgs("git", []string{"commit", "--allow-empty", "-m", fmt.Sprintf("'purged %v v%v-.+'", params.Chart, params.Version)})
 		runCommand("git push origin master")
@@ -204,7 +198,7 @@ func main() {
 		}
 
 		log.Printf("\nShowing template to be installed...\n")
-		runCommand("helm template --name %v %v-%v.tgz %v -n %v", params.ReleaseName, params.Chart, params.Version, filesParameter, params.Namespace)
+		err = runCommandExtended("helm diff upgrade --install %v %v-%v.tgz %v -n %v", params.ReleaseName, params.Chart, params.Version, filesParameter, params.Namespace)
 
 		log.Printf("\nInstalling chart and waiting for %vs for it to be ready...\n", params.Timeout)
 		err = runCommandExtended("helm upgrade --install %v %v-%v.tgz %v -n %v --wait --timeout %v", params.ReleaseName, params.Chart, params.Version, filesParameter, params.Namespace, params.Timeout)
