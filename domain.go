@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 var defaultTimeout = 120
 
 type params struct {
@@ -15,9 +17,10 @@ type params struct {
 	Values              string `json:"values,omitempty" yaml:"values,omitempty"`
 	ReleaseName         string `json:"release,omitempty" yaml:"release,omitempty"`
 	Namespace           string `json:"namespace,omitempty" yaml:"namespace,omitempty"`
+	Credentials         string `json:"credentials,omitempty"`
 }
 
-func (p *params) SetDefaults(gitName string, appLabel string, buildVersion string) {
+func (p *params) SetDefaults(gitName string, appLabel string, buildVersion string, releaseTargetName string) {
 
 	// set chart name
 	if p.Chart == "" {
@@ -58,5 +61,10 @@ func (p *params) SetDefaults(gitName string, appLabel string, buildVersion strin
 
 	if p.ReleaseName == "" {
 		p.ReleaseName = p.Chart
+	}
+
+	// default credentials to release name prefixed with gke if no override in stage params
+	if p.Credentials == "" && releaseTargetName != "" {
+		p.Credentials = fmt.Sprintf("gke-%v", releaseTargetName)
 	}
 }
