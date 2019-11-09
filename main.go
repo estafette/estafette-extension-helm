@@ -230,6 +230,7 @@ func runCommand(command string, args ...interface{}) {
 
 func runCommandExtended(command string, args ...interface{}) error {
 	command = fmt.Sprintf(command, args...)
+	command = strings.ReplaceAll(command, "  ", " ")
 	commandArray := strings.Split(command, " ")
 	var c string
 	var a []string
