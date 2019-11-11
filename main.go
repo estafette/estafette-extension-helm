@@ -171,7 +171,7 @@ func main() {
 			log.Fatalf("Failed changing directory to %v; %v", params.RepositoryDirectory, err)
 		}
 
-		filesGlob := fmt.Sprintf("%v/%v/%v-%v-*.tgz", params.RepositoryDirectory, params.ChartsRepositoryChartsSubdirectory, params.Chart, params.Version)
+		filesGlob := fmt.Sprintf("%v/%v-%v-*.tgz", params.ChartsRepositoryChartsSubdirectory, params.Chart, params.Version)
 		log.Printf("glob: %v", filesGlob)
 		files, err := filepath.Glob(filesGlob)
 		if err != nil {
