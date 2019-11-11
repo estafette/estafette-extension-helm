@@ -177,17 +177,22 @@ func main() {
 		if err != nil {
 			log.Fatalf("Failed globbing %v; %v", filesGlob, err)
 		}
-		runCommand("rm -f %v", strings.Join(files, " "))
+		if len(files) > 0 {
+			runCommand("rm -f %v", strings.Join(files, " "))
 
-		log.Printf("\nGenerating/updating index file for repository %v...\n", params.ChartsRepositoryURL)
-		runCommand("helm repo index --url %v .", params.ChartsRepositoryURL)
+			log.Printf("\nGenerating/updating index file for repository %v...\n", params.ChartsRepositoryURL)
+			runCommand("helm repo index --url %v .", params.ChartsRepositoryURL)
 
-		log.Printf("\nPushing changes to repository...\n")
-		runCommandWithArgs("git", []string{"config", "--global", "user.email", "'bot@estafette.io'"})
-		runCommandWithArgs("git", []string{"config", "--global", "user.name", "'estafette-bot'"})
-		runCommand("git add --all")
-		runCommandWithArgs("git", []string{"commit", "--allow-empty", "-m", fmt.Sprintf("'purged %v v%v-.+'", params.Chart, params.Version)})
-		runCommand("git push origin master")
+			log.Printf("\nPushing changes to repository...\n")
+			runCommandWithArgs("git", []string{"config", "--global", "user.email", "'bot@estafette.io'"})
+			runCommandWithArgs("git", []string{"config", "--global", "user.name", "'estafette-bot'"})
+			runCommand("git add --all")
+			runCommandWithArgs("git", []string{"commit", "--allow-empty", "-m", fmt.Sprintf("'purged %v v%v-.+'", params.Chart, params.Version)})
+			runCommand("git push origin master")
+
+		} else {
+			log.Printf("Found 0 files to purge")
+		}
 
 	case "install":
 		log.Printf("Installing chart %v with app version %v and version %v...", params.Chart, params.AppVersion, params.Version)
