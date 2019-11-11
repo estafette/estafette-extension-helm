@@ -172,6 +172,7 @@ func main() {
 		}
 
 		filesGlob := fmt.Sprintf("%v/%v/%v-%v-*.tgz", params.RepositoryDirectory, params.ChartsRepositoryChartsSubdirectory, params.Chart, params.Version)
+		log.Printf("glob: %v", filesGlob)
 		files, err := filepath.Glob(filesGlob)
 		if err != nil {
 			log.Fatalf("Failed globbing %v; %v", filesGlob, err)
@@ -263,28 +264,20 @@ func main() {
 		}
 
 		filename := fmt.Sprintf("%v-%v.tgz", params.Chart, params.Version)
-		if fileExists(filename) {
-			log.Printf("\nShowing template to be installed...\n")
-			runCommand("helm diff upgrade %v %v %v --namespace %v --allow-unreleased", params.ReleaseName, filename, overrideValuesFilesParameter, params.Namespace)
+		if !fileExists(filename) {
+			log.Printf("\nNo helm package present, retrieving helm chart %v version %v from %v...\n", params.Chart, params.Version, params.ChartsRepositoryURL)
+			runCommand("helm fetch %v --version %v --repo %v", params.Chart, params.Version, params.ChartsRepositoryURL)
+		}
 
-			log.Printf("\nInstalling chart and waiting for %vs for it to be ready...\n", *params.Timeout)
-			err = runCommandExtended("helm upgrade --install %v %v %v --namespace %v --wait --timeout %v", params.ReleaseName, filename, overrideValuesFilesParameter, params.Namespace, *params.Timeout)
-			if err != nil {
-				log.Printf("Installation timed out, showing logs...")
-				runCommand("kubectl logs -l app.kubernetes.io/name=%v,app.kubernetes.io/instance=%v,app.kubernetes.io/version=%v -n %v", params.Chart, params.ReleaseName, params.Version, params.Namespace)
-				os.Exit(1)
-			}
-		} else {
-			log.Printf("\nShowing template to be installed...\n")
-			runCommand("helm diff upgrade %v %v --version %v %v --namespace %v --repo %v --allow-unreleased", params.ReleaseName, params.Chart, params.Version, overrideValuesFilesParameter, params.Namespace, params.ChartsRepositoryURL)
+		log.Printf("\nShowing template to be installed...\n")
+		runCommand("helm diff upgrade %v %v %v --namespace %v --allow-unreleased", params.ReleaseName, filename, overrideValuesFilesParameter, params.Namespace)
 
-			log.Printf("\nInstalling chart from repository %v and waiting for %vs for it to be ready...\n", params.ChartsRepositoryURL, *params.Timeout)
-			err = runCommandExtended("helm upgrade --install %v %v --version %v %v --namespace %v --repo %v --wait --timeout %v", params.ReleaseName, params.Chart, params.Version, overrideValuesFilesParameter, params.Namespace, params.ChartsRepositoryURL, *params.Timeout)
-			if err != nil {
-				log.Printf("Installation timed out, showing logs...")
-				runCommand("kubectl logs -l app.kubernetes.io/name=%v,app.kubernetes.io/instance=%v,app.kubernetes.io/version=%v -n %v", params.Chart, params.ReleaseName, params.Version, params.Namespace)
-				os.Exit(1)
-			}
+		log.Printf("\nInstalling chart and waiting for %vs for it to be ready...\n", *params.Timeout)
+		err = runCommandExtended("helm upgrade --install %v %v %v --namespace %v --wait --timeout %v", params.ReleaseName, filename, overrideValuesFilesParameter, params.Namespace, *params.Timeout)
+		if err != nil {
+			log.Printf("Installation timed out, showing logs...")
+			runCommand("kubectl logs -l app.kubernetes.io/name=%v,app.kubernetes.io/instance=%v,app.kubernetes.io/version=%v -n %v", params.Chart, params.ReleaseName, params.Version, params.Namespace)
+			os.Exit(1)
 		}
 
 		log.Printf("\nShowing logs for container...\n")
