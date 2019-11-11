@@ -112,8 +112,8 @@ func main() {
 		runCommand("kubectl -n kube-system create serviceaccount tiller")
 		runCommand("kubectl create clusterrolebinding tiller --clusterrole=cluster-admin --serviceaccount=kube-system:tiller")
 		runCommand("helm init --client-only")
-		runCommand("helm version")
 		runCommand("helm tiller start-ci helm-tillerless")
+		runCommand("helm version")
 
 		overrideValuesFilesParameter := ""
 		if params.Values != "" {
@@ -260,8 +260,8 @@ func main() {
 		runCommandWithArgs("gcloud", clustersGetCredentialsArsgs)
 
 		runCommand("helm init --client-only")
-		runCommand("helm version")
 		runCommand("helm tiller start-ci helm-tillerless")
+		runCommand("helm version")
 
 		overrideValuesFilesParameter := ""
 		if params.Values != "" {
