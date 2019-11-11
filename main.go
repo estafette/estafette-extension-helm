@@ -64,11 +64,11 @@ func main() {
 	case
 		"lint":
 		log.Printf("Linting chart %v...", params.Chart)
-		runCommand("helm lint %v", params.Chart)
+		runCommand("helm lint %v", filepath.Join(params.HelmChartsSubdirectory, params.Chart))
 
 	case "package":
 		log.Printf("Packaging chart %v with app version %v and version %v...", params.Chart, params.AppVersion, params.Version)
-		runCommand("helm package --save=false --app-version %v --version %v %v", params.AppVersion, params.Version, params.Chart)
+		runCommand("helm package --save=false --app-version %v --version %v %v", params.AppVersion, params.Version, filepath.Join(params.HelmChartsSubdirectory, params.Chart))
 
 	case "test":
 		log.Printf("Testing chart %v with app version %v and version %v on kind host %v...", params.Chart, params.AppVersion, params.Version, params.KindHost)
@@ -113,22 +113,23 @@ func main() {
 		runCommand("kubectl create clusterrolebinding tiller --clusterrole=cluster-admin --serviceaccount=kube-system:tiller")
 		runCommand("helm init --service-account tiller --wait")
 
-		filesParameter := ""
+		overrideValuesFilesParameter := ""
 		if params.Values != "" {
-			log.Printf("\nWriting values to values.yaml...\n")
-			err = ioutil.WriteFile("values.yaml", []byte(params.Values), 0644)
+			log.Printf("\nWriting values to override.yaml...\n")
+			err = ioutil.WriteFile("override.yaml", []byte(params.Values), 0644)
 			if err != nil {
-				log.Fatal("Failed writing values.yaml: ", err)
+				log.Fatal("Failed writing override.yaml: ", err)
 			}
-			filesParameter = "-f values.yaml"
-			runCommand("cat values.yaml")
+			overrideValuesFilesParameter = "-f override.yaml"
+			runCommand("cat override.yaml")
 		}
 
+		filename := fmt.Sprintf("%v-%v.tgz", params.Chart, params.Version)
 		log.Printf("\nShowing template to be installed...\n")
-		runCommand("helm diff upgrade %v %v-%v.tgz %v --allow-unreleased", params.Chart, params.Chart, params.Version, filesParameter)
+		runCommand("helm diff upgrade %v %v %v --allow-unreleased", params.Chart, filename, overrideValuesFilesParameter)
 
-		log.Printf("\nInstalling chart and waiting for %vs for it to be ready...\n", params.Timeout)
-		err = runCommandExtended("helm upgrade --install %v %v-%v.tgz %v --wait --timeout %v", params.Chart, params.Chart, params.Version, filesParameter, params.Timeout)
+		log.Printf("\nInstalling chart file %v and waiting for %vs for it to be ready...\n", filename, params.Timeout)
+		err = runCommandExtended("helm upgrade --install %v %v %v --wait --timeout %v", params.Chart, filename, overrideValuesFilesParameter, params.Timeout)
 		if err != nil {
 			log.Printf("Installation timed out, showing logs...")
 			runCommand("kubectl logs -l app.kubernetes.io/name=%v,app.kubernetes.io/instance=%v", params.Chart, params.Chart)
@@ -141,8 +142,9 @@ func main() {
 	case "publish":
 		log.Printf("Publishing chart %v with app version %v and version %v...", params.Chart, params.AppVersion, params.Version)
 
-		runCommand("mkdir -p %v/%v", params.RepositoryDirectory, params.ChartsSubdirectory)
-		runCommand("cp %v-%v.tgz %v/%v", params.Chart, params.Version, params.RepositoryDirectory, params.ChartsSubdirectory)
+		filename := fmt.Sprintf("%v-%v.tgz", params.Chart, params.Version)
+		runCommand("mkdir -p %v/%v", params.RepositoryDirectory, params.ChartsRepositoryChartsSubdirectory)
+		runCommand("cp %v %v/%v", filename, params.RepositoryDirectory, params.ChartsRepositoryChartsSubdirectory)
 		err = os.Chdir(params.RepositoryDirectory)
 		if err != nil {
 			log.Fatalf("Failed changing directory to %v; %v", params.RepositoryDirectory, err)
@@ -162,13 +164,13 @@ func main() {
 	case "purge":
 		log.Printf("Purging pre-release version for chart %v with versions '%v-.+'...", params.Chart, params.Version)
 
-		runCommand("mkdir -p %v/%v", params.RepositoryDirectory, params.ChartsSubdirectory)
+		runCommand("mkdir -p %v/%v", params.RepositoryDirectory, params.ChartsRepositoryChartsSubdirectory)
 		err = os.Chdir(params.RepositoryDirectory)
 		if err != nil {
 			log.Fatalf("Failed changing directory to %v; %v", params.RepositoryDirectory, err)
 		}
 
-		filesGlob := fmt.Sprintf("%v/%v/%v-%v-*.tgz", params.RepositoryDirectory, params.ChartsSubdirectory, params.Chart, params.Version)
+		filesGlob := fmt.Sprintf("%v/%v/%v-%v-*.tgz", params.RepositoryDirectory, params.ChartsRepositoryChartsSubdirectory, params.Chart, params.Version)
 		files, err := filepath.Glob(filesGlob)
 		if err != nil {
 			log.Fatalf("Failed globbing %v; %v", filesGlob, err)
@@ -186,9 +188,7 @@ func main() {
 		runCommand("git push origin master")
 
 	case "install":
-		log.Printf("Install chart %v with app version %v and version %v...", params.Chart, params.AppVersion, params.Version)
-
-		// TODO get kube config for target to deploy to
+		log.Printf("Installing chart %v with app version %v and version %v...", params.Chart, params.AppVersion, params.Version)
 
 		if *credentialsJSON == "" {
 			log.Fatal("Credentials of type kubernetes-engine are not injected; configure this extension as trusted and inject credentials of type kubernetes-engine")
@@ -250,26 +250,38 @@ func main() {
 		}
 		runCommandWithArgs("gcloud", clustersGetCredentialsArsgs)
 
-		filesParameter := ""
+		overrideValuesFilesParameter := ""
 		if params.Values != "" {
-			log.Printf("\nWriting values to values.yaml...\n")
-			err = ioutil.WriteFile("values.yaml", []byte(params.Values), 0644)
+			log.Printf("\nWriting values to override.yaml...\n")
+			err = ioutil.WriteFile("override.yaml", []byte(params.Values), 0644)
 			if err != nil {
-				log.Fatal("Failed writing values.yaml: ", err)
+				log.Fatal("Failed writing override.yaml: ", err)
 			}
-			filesParameter = "-f values.yaml"
-			runCommand("cat values.yaml")
+			overrideValuesFilesParameter = "-f override.yaml"
+			runCommand("cat override.yaml")
 		}
 
-		log.Printf("\nShowing template to be installed...\n")
-		err = runCommandExtended("helm diff upgrade %v %v-%v.tgz %v -n %v --allow-unreleased", params.ReleaseName, params.Chart, params.Version, filesParameter, params.Namespace)
+		filename := fmt.Sprintf("%v-%v.tgz", params.Chart, params.Version)
 
-		log.Printf("\nInstalling chart and waiting for %vs for it to be ready...\n", params.Timeout)
-		err = runCommandExtended("helm upgrade --install %v %v-%v.tgz %v -n %v --wait --timeout %v", params.ReleaseName, params.Chart, params.Version, filesParameter, params.Namespace, params.Timeout)
-		if err != nil {
-			log.Printf("Installation timed out, showing logs...")
-			runCommand("kubectl logs -l app.kubernetes.io/name=%v,app.kubernetes.io/instance=%v,app.kubernetes.io/version=%v -n %v", params.Chart, params.ReleaseName, params.Version, params.Namespace)
-			os.Exit(1)
+		log.Printf("\nShowing template to be installed...\n")
+		runCommand("helm diff upgrade %v %v %v -n %v --allow-unreleased", params.ReleaseName, filename, overrideValuesFilesParameter, params.Namespace)
+
+		if fileExists(filename) {
+			log.Printf("\nInstalling chart and waiting for %vs for it to be ready...\n", params.Timeout)
+			err = runCommandExtended("helm upgrade --install %v %v %v -n %v --wait --timeout %v", params.ReleaseName, filename, overrideValuesFilesParameter, params.Namespace, params.Timeout)
+			if err != nil {
+				log.Printf("Installation timed out, showing logs...")
+				runCommand("kubectl logs -l app.kubernetes.io/name=%v,app.kubernetes.io/instance=%v,app.kubernetes.io/version=%v -n %v", params.Chart, params.ReleaseName, params.Version, params.Namespace)
+				os.Exit(1)
+			}
+		} else {
+			log.Printf("\nInstalling chart from repository %v and waiting for %vs for it to be ready...\n", params.ChartsRepositoryURL, params.Timeout)
+			err = runCommandExtended("helm upgrade --install %v %v --version %v %v -n %v --repo %v --wait --timeout %v", params.ReleaseName, params.Chart, params.Version, overrideValuesFilesParameter, params.ChartsRepositoryURL, params.Namespace, params.Timeout)
+			if err != nil {
+				log.Printf("Installation timed out, showing logs...")
+				runCommand("kubectl logs -l app.kubernetes.io/name=%v,app.kubernetes.io/instance=%v,app.kubernetes.io/version=%v -n %v", params.Chart, params.ReleaseName, params.Version, params.Namespace)
+				os.Exit(1)
+			}
 		}
 
 		log.Printf("\nShowing logs for container...\n")
@@ -277,7 +289,6 @@ func main() {
 	default:
 		log.Fatalf("Action '%v' is not supported; please use action parameter value 'lint','package','test', 'publish', 'install' or 'purge'", params.Action)
 	}
-
 }
 
 func handleError(err error) {
@@ -293,7 +304,12 @@ func runCommand(command string, args ...interface{}) {
 
 func runCommandExtended(command string, args ...interface{}) error {
 	command = fmt.Sprintf(command, args...)
+
+	// trim spaces and de-dupe spaces in string
 	command = strings.ReplaceAll(command, "  ", " ")
+	command = strings.Trim(command, " ")
+
+	// split into actual command and arguments
 	commandArray := strings.Split(command, " ")
 	var c string
 	var a []string
@@ -324,4 +340,12 @@ func runCommandWithArgsExtended(command string, args []string) error {
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
 	return err
+}
+
+func fileExists(filename string) bool {
+	info, err := os.Stat(filename)
+	if os.IsNotExist(err) {
+		return false
+	}
+	return !info.IsDir()
 }

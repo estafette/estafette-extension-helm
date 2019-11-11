@@ -5,19 +5,20 @@ import "fmt"
 var defaultTimeout = 120
 
 type params struct {
-	Action              string `json:"action,omitempty" yaml:"action,omitempty"`
-	Chart               string `json:"chart,omitempty" yaml:"chart,omitempty"`
-	AppVersion          string `json:"appVersion,omitempty" yaml:"appVersion,omitempty"`
-	Version             string `json:"version,omitempty" yaml:"version,omitempty"`
-	KindHost            string `json:"kindHost,omitempty" yaml:"kindHost,omitempty"`
-	Timeout             *int   `json:"timeout,omitempty" yaml:"timeout,omitempty"`
-	RepositoryDirectory string `json:"repoDir,omitempty" yaml:"repoDir,omitempty"`
-	ChartsSubdirectory  string `json:"chartsSubdir,omitempty" yaml:"chartsSubdir,omitempty"`
-	ChartsRepositoryURL string `json:"repoUrl,omitempty" yaml:"repoUrl,omitempty"`
-	Values              string `json:"values,omitempty" yaml:"values,omitempty"`
-	ReleaseName         string `json:"release,omitempty" yaml:"release,omitempty"`
-	Namespace           string `json:"namespace,omitempty" yaml:"namespace,omitempty"`
-	Credentials         string `json:"credentials,omitempty"`
+	Action                             string `json:"action,omitempty" yaml:"action,omitempty"`
+	Chart                              string `json:"chart,omitempty" yaml:"chart,omitempty"`
+	HelmChartsSubdirectory             string `json:"chartsSubdir,omitempty" yaml:"chartsSubdir,omitempty"`
+	AppVersion                         string `json:"appVersion,omitempty" yaml:"appVersion,omitempty"`
+	Version                            string `json:"version,omitempty" yaml:"version,omitempty"`
+	KindHost                           string `json:"kindHost,omitempty" yaml:"kindHost,omitempty"`
+	Timeout                            *int   `json:"timeout,omitempty" yaml:"timeout,omitempty"`
+	RepositoryDirectory                string `json:"repoDir,omitempty" yaml:"repoDir,omitempty"`
+	ChartsRepositoryChartsSubdirectory string `json:"repoChartsSubdir,omitempty" yaml:"repoChartsSubdir,omitempty"`
+	ChartsRepositoryURL                string `json:"repoUrl,omitempty" yaml:"repoUrl,omitempty"`
+	Values                             string `json:"values,omitempty" yaml:"values,omitempty"`
+	ReleaseName                        string `json:"release,omitempty" yaml:"release,omitempty"`
+	Namespace                          string `json:"namespace,omitempty" yaml:"namespace,omitempty"`
+	Credentials                        string `json:"credentials,omitempty"`
 }
 
 func (p *params) SetDefaults(gitName string, appLabel string, buildVersion string, releaseTargetName string) {
@@ -47,12 +48,16 @@ func (p *params) SetDefaults(gitName string, appLabel string, buildVersion strin
 		p.Timeout = &defaultTimeout
 	}
 
+	if p.HelmChartsSubdirectory == "" {
+		p.HelmChartsSubdirectory = "helm"
+	}
+
 	if p.RepositoryDirectory == "" {
 		p.RepositoryDirectory = "helm-charts"
 	}
 
-	if p.ChartsSubdirectory == "" {
-		p.ChartsSubdirectory = "charts"
+	if p.ChartsRepositoryChartsSubdirectory == "" {
+		p.ChartsRepositoryChartsSubdirectory = "charts"
 	}
 
 	if p.ChartsRepositoryURL == "" {

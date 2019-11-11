@@ -4,17 +4,23 @@ This extension helps with linting, packaging, testing and adding Helm charts to 
 
 ## Parameters
 
-| Parameter         | Type     | Values |
-| ----------------- | -------- | ------ |
-| `chart`           | string   | The name of the chart and subdirectory where the chart is stored; defaults to `$ESTAFETTE_LABEL_APP` or `$ESTAFETTE_GIT_NAME` in that order |
-| `appVersion`      | string   | Can be used to override the app version; defaults to `$ESTAFETTE_BUILD_VERSION`                                                             |
-| `version`         | string   | Can be used to override the package version; defauls to `$ESTAFETTE_BUILD_VERSION`                                                          |
-| `kindHost`        | string   | The service container name running the [bsycorp/kind](https://hub.docker.com/r/bsycorp/kind) container to run tests against                 |
-| `timeout`         | int      | The time in seconds to wait for install during the `test` action to finish; defaults to 200 seconds                                         |
-| `repoDir`         | string   | The directory into which the chart repository is cloned; defaults to `helm-charts`                                                          |
-| `chartsSubdir`    | string   | The subdirectory of the chart repository into which the tgz files are copied; defaults to `charts`                                          |
-| `repoUrl`         | string   | The full url towards the helm repository, to be used to generate the `index.yaml` file; defaults to `https://helm.estafette.io/`            |
-| `values`          | string   | Contents of a values.yaml files to use with the install command during the `test` action in order to set required values                    |
+| Parameter          | Type     | Values |
+| ------------------ | -------- | ------ |
+| `chart`            | string   | The name of the chart and subdirectory where the chart is stored; defaults to `$ESTAFETTE_LABEL_APP` or `$ESTAFETTE_GIT_NAME` in that order |
+| `chartsSubdir`     | string   | The subdirectory in this repository where helm charts are stores; defaults to `helm`                                                        |
+| `appVersion`       | string   | Can be used to override the app version; defaults to `$ESTAFETTE_BUILD_VERSION`                                                             |
+| `version`          | string   | Can be used to override the package version; defauls to `$ESTAFETTE_BUILD_VERSION`                                                          |
+| `kindHost`         | string   | The service container name running the [bsycorp/kind](https://hub.docker.com/r/bsycorp/kind) container to run tests against                 |
+| `timeout`          | int      | The time in seconds to wait for install during the `test` action to finish; defaults to 200 seconds                                         |
+| `repoDir`          | string   | The directory into which the chart repository is cloned; defaults to `helm-charts`                                                          |
+| `repoChartsSubdir` | string   | The subdirectory of the chart repository into which the tgz files are copied; defaults to `charts`                                          |
+| `repoName`         | string   | Name to add the repository at `repoUrl` with for installing charts from repo instead of file                                                |
+| `repoUrl`          | string   | The full url towards the helm repository, to be used to generate the `index.yaml` file; defaults to `https://helm.estafette.io/`            |
+| `values`           | string   | Contents of a values.yaml files to use with the install command during the `test` action in order to set required values                    |
+
+	HelmChartsSubdirectory             string `json:"chartsSubdir,omitempty" yaml:"chartsSubdir,omitempty"`
+	ChartsRepositoryChartsSubdirectory string `json:"repoChartsSubdir,omitempty" yaml:"chartsSubdir,omitempty"`
+
 
 ## Usage
 
