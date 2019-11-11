@@ -252,6 +252,9 @@ func main() {
 		}
 		runCommandWithArgs("gcloud", clustersGetCredentialsArsgs)
 
+		runCommand("helm init --client-only")
+		runCommand("helm version")
+
 		overrideValuesFilesParameter := ""
 		if params.Values != "" {
 			log.Printf("\nWriting values to override.yaml...\n")
