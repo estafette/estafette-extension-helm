@@ -140,7 +140,7 @@ func main() {
 
 		filename := fmt.Sprintf("%v-%v.tgz", params.Chart, params.Version)
 		log.Printf("\nShowing template to be installed...\n")
-		_ = runCommandExtended("helm diff upgrade %v %v %v --allow-unreleased", params.Chart, filename, overrideValuesFilesParameter)
+		runCommand("helm diff upgrade %v %v %v --allow-unreleased", params.Chart, filename, overrideValuesFilesParameter)
 
 		log.Printf("\nInstalling chart file %v and waiting for %vs for it to be ready...\n", filename, *params.Timeout)
 		err = runCommandExtended("helm upgrade --install %v %v %v --wait --timeout %v", params.Chart, filename, overrideValuesFilesParameter, *params.Timeout)
@@ -310,7 +310,7 @@ func main() {
 		}
 
 		log.Printf("\nShowing template to be installed...\n")
-		_ = runCommandExtended("helm diff upgrade %v %v %v --namespace %v --allow-unreleased", params.ReleaseName, filename, overrideValuesFilesParameter, params.Namespace)
+		runCommand("helm diff upgrade %v %v %v --namespace %v --allow-unreleased", params.ReleaseName, filename, overrideValuesFilesParameter, params.Namespace)
 
 		log.Printf("\nInstalling chart and waiting for %vs for it to be ready...\n", *params.Timeout)
 		err = runCommandExtended("helm upgrade --install %v %v %v --namespace %v --wait --timeout %v", params.ReleaseName, filename, overrideValuesFilesParameter, params.Namespace, *params.Timeout)
