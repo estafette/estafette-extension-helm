@@ -115,6 +115,7 @@ func main() {
 		if params.Tillerless {
 			os.Setenv("HELM_TILLER_SILENT", "false")
 			os.Setenv("HELM_TILLER_LOGS", "true")
+			os.Setenv("HELM_TILLER_LOGS_DIR", filepath.Join(homeDir, ".helm/plugins/helm-tiller/logs"))
 			runCommand("helm tiller start-ci helm-tillerless")
 			os.Setenv("TILLER_NAMESPACE", "helm-tillerless")
 			os.Setenv("HELM_HOST", "127.0.0.1:44134")
@@ -277,6 +278,7 @@ func main() {
 		if params.Tillerless {
 			os.Setenv("HELM_TILLER_SILENT", "false")
 			os.Setenv("HELM_TILLER_LOGS", "true")
+			os.Setenv("HELM_TILLER_LOGS_DIR", filepath.Join(homeDir, ".helm/plugins/helm-tiller/logs"))
 			runCommand("helm tiller start-ci helm-tillerless")
 			os.Setenv("TILLER_NAMESPACE", "helm-tillerless")
 			os.Setenv("HELM_HOST", "127.0.0.1:44134")
