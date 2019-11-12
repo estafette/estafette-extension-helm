@@ -64,11 +64,11 @@ func main() {
 	case
 		"lint":
 		log.Printf("Linting chart %v...", params.Chart)
-		runCommand("helm lint %v", filepath.Join(params.HelmChartsSubdirectory, params.Chart))
+		runCommand("helm lint %v", filepath.Join(params.HelmSubdirectory, params.Chart))
 
 	case "package":
 		log.Printf("Packaging chart %v with app version %v and version %v...", params.Chart, params.AppVersion, params.Version)
-		runCommand("helm package --save=false --app-version %v --version %v %v", params.AppVersion, params.Version, filepath.Join(params.HelmChartsSubdirectory, params.Chart))
+		runCommand("helm package --save=false --app-version %v --version %v %v", params.AppVersion, params.Version, filepath.Join(params.HelmSubdirectory, params.Chart))
 
 	case "test":
 		log.Printf("Testing chart %v with app version %v and version %v on kind host %v...", params.Chart, params.AppVersion, params.Version, params.KindHost)
@@ -111,8 +111,14 @@ func main() {
 
 		runCommand("kubectl -n kube-system create serviceaccount tiller")
 		runCommand("kubectl create clusterrolebinding tiller --clusterrole=cluster-admin --serviceaccount=kube-system:tiller")
-		runCommand("helm init --client-only")
-		runCommand("helm tiller start-ci helm-tillerless")
+
+		if params.Tillerless {
+			runCommand("helm init --client-only")
+			runCommand("helm tiller start-ci helm-tillerless")
+			os.Setenv("HELM_HOST", "127.0.0.1:44134")
+		} else {
+			runCommand("helm init --service-account tiller --wait")
+		}
 		runCommand("helm version")
 
 		overrideValuesFilesParameter := ""
@@ -146,15 +152,15 @@ func main() {
 		log.Printf("Publishing chart %v with app version %v and version %v...", params.Chart, params.AppVersion, params.Version)
 
 		filename := fmt.Sprintf("%v-%v.tgz", params.Chart, params.Version)
-		runCommand("mkdir -p %v/%v", params.RepositoryDirectory, params.ChartsRepositoryChartsSubdirectory)
-		runCommand("cp %v %v/%v", filename, params.RepositoryDirectory, params.ChartsRepositoryChartsSubdirectory)
+		runCommand("mkdir -p %v/%v", params.RepositoryDirectory, params.RepositoryChartsSubdirectory)
+		runCommand("cp %v %v/%v", filename, params.RepositoryDirectory, params.RepositoryChartsSubdirectory)
 		err = os.Chdir(params.RepositoryDirectory)
 		if err != nil {
 			log.Fatalf("Failed changing directory to %v; %v", params.RepositoryDirectory, err)
 		}
 
-		log.Printf("\nGenerating/updating index file for repository %v...\n", params.ChartsRepositoryURL)
-		runCommand("helm repo index --url %v .", params.ChartsRepositoryURL)
+		log.Printf("\nGenerating/updating index file for repository %v...\n", params.RepositoryURL)
+		runCommand("helm repo index --url %v .", params.RepositoryURL)
 
 		log.Printf("\nPushing changes to repository...\n")
 		runCommandWithArgs("git", []string{"config", "--global", "user.email", "'bot@estafette.io'"})
@@ -167,13 +173,13 @@ func main() {
 	case "purge":
 		log.Printf("Purging pre-release version for chart %v with versions '%v-.+'...", params.Chart, params.Version)
 
-		runCommand("mkdir -p %v/%v", params.RepositoryDirectory, params.ChartsRepositoryChartsSubdirectory)
+		runCommand("mkdir -p %v/%v", params.RepositoryDirectory, params.RepositoryChartsSubdirectory)
 		err = os.Chdir(params.RepositoryDirectory)
 		if err != nil {
 			log.Fatalf("Failed changing directory to %v; %v", params.RepositoryDirectory, err)
 		}
 
-		filesGlob := fmt.Sprintf("%v/%v-%v-*.tgz", params.ChartsRepositoryChartsSubdirectory, params.Chart, params.Version)
+		filesGlob := fmt.Sprintf("%v/%v-%v-*.tgz", params.RepositoryChartsSubdirectory, params.Chart, params.Version)
 		log.Printf("glob: %v", filesGlob)
 		files, err := filepath.Glob(filesGlob)
 		if err != nil {
@@ -182,8 +188,8 @@ func main() {
 		if len(files) > 0 {
 			runCommand("rm -f %v", strings.Join(files, " "))
 
-			log.Printf("\nGenerating/updating index file for repository %v...\n", params.ChartsRepositoryURL)
-			runCommand("helm repo index --url %v .", params.ChartsRepositoryURL)
+			log.Printf("\nGenerating/updating index file for repository %v...\n", params.RepositoryURL)
+			runCommand("helm repo index --url %v .", params.RepositoryURL)
 
 			log.Printf("\nPushing changes to repository...\n")
 			runCommandWithArgs("git", []string{"config", "--global", "user.email", "'bot@estafette.io'"})
@@ -259,8 +265,13 @@ func main() {
 		}
 		runCommandWithArgs("gcloud", clustersGetCredentialsArsgs)
 
-		runCommand("helm init --client-only")
-		runCommand("helm tiller start-ci helm-tillerless")
+		if params.Tillerless {
+			runCommand("helm init --client-only")
+			runCommand("helm tiller start-ci helm-tillerless")
+			os.Setenv("HELM_HOST", "127.0.0.1:44134")
+		} else {
+			runCommand("helm init --service-account tiller --wait")
+		}
 		runCommand("helm version")
 
 		overrideValuesFilesParameter := ""
@@ -276,8 +287,8 @@ func main() {
 
 		filename := fmt.Sprintf("%v-%v.tgz", params.Chart, params.Version)
 		if !fileExists(filename) {
-			log.Printf("\nNo helm package present, retrieving helm chart %v version %v from %v...\n", params.Chart, params.Version, params.ChartsRepositoryURL)
-			runCommand("helm fetch %v --version %v --repo %v", params.Chart, params.Version, params.ChartsRepositoryURL)
+			log.Printf("\nNo helm package present, retrieving helm chart %v version %v from %v...\n", params.Chart, params.Version, params.RepositoryURL)
+			runCommand("helm fetch %v --version %v --repo %v", params.Chart, params.Version, params.RepositoryURL)
 		}
 
 		log.Printf("\nShowing template to be installed...\n")
@@ -294,7 +305,7 @@ func main() {
 		log.Printf("\nShowing logs for container...\n")
 		runCommand("kubectl logs -l app.kubernetes.io/name=%v,app.kubernetes.io/instance=%v,app.kubernetes.io/version=%v -n %v", params.Chart, params.ReleaseName, params.Version, params.Namespace)
 	default:
-		log.Fatalf("Action '%v' is not supported; please use action parameter value 'lint','package','test', 'publish', 'install' or 'purge'", params.Action)
+		log.Fatalf("Action '%v' is not supported; please use action parameter value 'lint', 'package', 'test', 'publish', 'install' or 'purge'", params.Action)
 	}
 }
 

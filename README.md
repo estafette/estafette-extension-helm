@@ -4,23 +4,23 @@ This extension helps with linting, packaging, testing and adding Helm charts to 
 
 ## Parameters
 
-| Parameter          | Type     | Values |
-| ------------------ | -------- | ------ |
-| `chart`            | string   | The name of the chart and subdirectory where the chart is stored; defaults to `$ESTAFETTE_LABEL_APP` or `$ESTAFETTE_GIT_NAME` in that order |
-| `chartsSubdir`     | string   | The subdirectory in this repository where helm charts are stores; defaults to `helm`                                                        |
-| `appVersion`       | string   | Can be used to override the app version; defaults to `$ESTAFETTE_BUILD_VERSION`                                                             |
-| `version`          | string   | Can be used to override the package version; defauls to `$ESTAFETTE_BUILD_VERSION`                                                          |
-| `kindHost`         | string   | The service container name running the [bsycorp/kind](https://hub.docker.com/r/bsycorp/kind) container to run tests against                 |
-| `timeout`          | int      | The time in seconds to wait for install during the `test` action to finish; defaults to 200 seconds                                         |
-| `repoDir`          | string   | The directory into which the chart repository is cloned; defaults to `helm-charts`                                                          |
-| `repoChartsSubdir` | string   | The subdirectory of the chart repository into which the tgz files are copied; defaults to `charts`                                          |
-| `repoName`         | string   | Name to add the repository at `repoUrl` with for installing charts from repo instead of file                                                |
-| `repoUrl`          | string   | The full url towards the helm repository, to be used to generate the `index.yaml` file; defaults to `https://helm.estafette.io/`            |
-| `values`           | string   | Contents of a values.yaml files to use with the install command during the `test` action in order to set required values                    |
-
-	HelmChartsSubdirectory             string `json:"chartsSubdir,omitempty" yaml:"chartsSubdir,omitempty"`
-	ChartsRepositoryChartsSubdirectory string `json:"repoChartsSubdir,omitempty" yaml:"chartsSubdir,omitempty"`
-
+| Parameter          | Type     | Values                                                                                                                                              |
+| ------------------ | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `action`           | string   | Determines the action taken by the extension; valid options are `lint`, `package`, `test`, `publish`, `install` or `purge`                          |
+| `appVersion`       | string   | Can be used to override the app version; defaults to `$ESTAFETTE_BUILD_VERSION`                                                                     |
+| `chart`            | string   | The name of the chart and subdirectory where the chart is stored; defaults to `$ESTAFETTE_LABEL_APP` or `$ESTAFETTE_GIT_NAME` in that order         |
+| `credentials`      | string   | To set a specific set of type `kubernetes-engine` credentials when using action `install`; defaults to the release target name prefixed with `gke-` |
+| `helmSubdir`       | string   | The subdirectory in this repository where helm charts are stores; defaults to `helm`                                                                |
+| `kindHost`         | string   | The service container name running the [bsycorp/kind](https://hub.docker.com/r/bsycorp/kind) container to run tests against                         |
+| `namespace`        | string   | The namespace to deploy to when using action `install`                                                                                              |
+| `releaseName`      | string   | Name for the Helm release created with action `install`; defaults to the `chart` name                                                               |
+| `repoDir`          | string   | The directory into which the chart repository is cloned; defaults to `helm-charts`                                                                  |
+| `repoChartsSubdir` | string   | The subdirectory of the chart repository into which the tgz files are copied; defaults to `charts`                                                  |
+| `repoUrl`          | string   | The full url towards the helm repository, to be used to generate the `index.yaml` file; defaults to `https://helm.estafette.io/`                    |
+| `tillerless`       | bool     | When true the tillerless plugin is used to `install` the chart; otherwise Tiller needs to be preinstalled in the cluster                            |
+| `timeout`          | int      | The time in seconds to wait for install during the `test` action to finish; defaults to 200 seconds                                                 |
+| `values`           | string   | Contents of a values.yaml files to use with the install command during the `test` action in order to set required values                            |
+| `version`          | string   | Can be used to override the package version; defauls to `$ESTAFETTE_BUILD_VERSION`                                                                  |
 
 ## Usage
 
@@ -65,13 +65,15 @@ Testing depends on Estafette's service containers to provide a Kubernetes enviro
         cloudflareApiKey=abc
 ```
 
+Note: For the above to work make sure image `bsycorp/kind` is configured as _trusted image_ with `runPrivileged: true`.
+
 ### Publishing
 
 In order to publish to a git repository you first need to clone that git repository and then run the `publish` action as follows:
 
 ```yaml
   clone-charts-repo:
-    image: extensions/git-clone:dev
+    image: extensions/git-clone:stable
     repo: helm-charts
     branch: master
     subdir: helm-charts
@@ -104,7 +106,7 @@ This moves the autoincrementing build number from the `patch` field - which is d
 
 ### Purge
 
-When releasing your final version you might want to purge the pre-release versions leading up to that moment. You can do sith with `action: purge`, for example in a release target. You'll have to clone the Helm chart repository first:
+When releasing your final version you might want to purge the pre-release versions leading up to that moment. You can do this with `action: purge`, for example in a release target. You'll have to clone the Helm chart repository first:
 
 ```yaml
 releases:
@@ -123,4 +125,36 @@ releases:
         image: extensions/github-release:stable
 ```
 
-Notice at the end it creates a Github release, for which it expects a milestone to be present with the title equal to `$ESTAFETTE_BUILD_VERSION`.
+Notice at the end it creates a Github release, for which it expects a milestone to be present with the title equal to `${ESTAFETTE_BUILD_VERSION}`.
+
+### Install
+
+The Helm extension is configured as a _trusted image_ and gets credentials of type _kubernetes-engine_ injected; by default the release target name gets prefixed with `gke-` to select the credentials, or it can be set explicitly with the `credentials` parameter.
+
+```yaml
+releases:
+  development:
+    stages:
+      install:
+        image: extensions/helm:stable
+        action: install
+        namespace: mynamespace
+        repoUrl: https://helm.estafette.io
+```
+
+The install will try to use the package from the repository it's previously been pushed to. You can also use the local chart in the following way in order to install charts that haven't been published:
+
+```yaml
+releases:
+  clone: true
+  development:
+    stages:
+      package-helm-chart:
+        image: extensions/helm:stable
+        action: package
+
+      install:
+        image: extensions/helm:stable
+        action: install
+        namespace: mynamespace
+```

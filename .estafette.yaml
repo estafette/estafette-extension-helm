@@ -36,8 +36,7 @@ stages:
 
       ENV VERSION="${ESTAFETTE_BUILD_VERSION}" \
           HELM_DIFF_VERSION=v2.11.0+5 \
-          HELM_TILLER_VERSION=v0.8.1 \
-          HELM_HOST="127.0.0.1:44134"
+          HELM_TILLER_VERSION=v0.9.3
 
       RUN apk add --update --no-cache \
             git \
