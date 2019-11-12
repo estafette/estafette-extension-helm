@@ -113,6 +113,7 @@ func main() {
 		runCommand("kubectl create clusterrolebinding tiller --clusterrole=cluster-admin --serviceaccount=kube-system:tiller")
 
 		if params.Tillerless {
+			runCommand("helm init --client-only")
 			runCommand("kubectl create ns %v", params.TillerlessNamespace)
 			os.Setenv("HELM_TILLER_SILENT", "false")
 			os.Setenv("HELM_TILLER_LOGS", "true")
@@ -277,6 +278,7 @@ func main() {
 		homeDir := usr.HomeDir
 
 		if params.Tillerless {
+			runCommand("helm init --client-only")
 			runCommand("kubectl create ns %v", params.TillerlessNamespace)
 			os.Setenv("HELM_TILLER_SILENT", "false")
 			os.Setenv("HELM_TILLER_LOGS", "true")
