@@ -150,12 +150,12 @@ func main() {
 			if params.Tillerless {
 				runCommand("cat %v", filepath.Join(homeDir, ".helm/plugins/helm-tiller/logs"))
 			}
-			runCommand("kubectl logs -l app.kubernetes.io/name=%v,app.kubernetes.io/instance=%v", params.Chart, params.Chart)
+			runCommand("kubectl logs -l app.kubernetes.io/name=%v,app.kubernetes.io/instance=%v -c %v", params.Chart, params.Chart, params.Chart)
 			os.Exit(1)
 		}
 
 		log.Printf("\nShowing logs for container...\n")
-		runCommand("kubectl logs -l app.kubernetes.io/name=%v,app.kubernetes.io/instance=%v", params.Chart, params.Chart)
+		runCommand("kubectl logs -l app.kubernetes.io/name=%v,app.kubernetes.io/instance=%v -c %v", params.Chart, params.Chart, params.Chart)
 
 	case "publish":
 		log.Printf("Publishing chart %v with app version %v and version %v...", params.Chart, params.AppVersion, params.Version)
@@ -319,12 +319,12 @@ func main() {
 			if params.Tillerless {
 				runCommand("cat %v", filepath.Join(homeDir, ".helm/plugins/helm-tiller/logs"))
 			}
-			runCommand("kubectl logs -l app.kubernetes.io/name=%v,app.kubernetes.io/instance=%v,app.kubernetes.io/version=%v -n %v", params.Chart, params.ReleaseName, params.Version, params.Namespace)
+			runCommand("kubectl logs -l app.kubernetes.io/name=%v,app.kubernetes.io/instance=%v,app.kubernetes.io/version=%v -n %v -c %v", params.Chart, params.ReleaseName, params.Version, params.Namespace, params.Chart)
 			os.Exit(1)
 		}
 
 		log.Printf("\nShowing logs for container...\n")
-		runCommand("kubectl logs -l app.kubernetes.io/name=%v,app.kubernetes.io/instance=%v,app.kubernetes.io/version=%v -n %v", params.Chart, params.ReleaseName, params.Version, params.Namespace)
+		runCommand("kubectl logs -l app.kubernetes.io/name=%v,app.kubernetes.io/instance=%v,app.kubernetes.io/version=%v -n %v -c %v", params.Chart, params.ReleaseName, params.Version, params.Namespace, params.Chart)
 	default:
 		log.Fatalf("Action '%v' is not supported; please use action parameter value 'lint', 'package', 'test', 'publish', 'install' or 'purge'", params.Action)
 	}
