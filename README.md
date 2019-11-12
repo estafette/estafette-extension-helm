@@ -6,7 +6,7 @@ This extension helps with linting, packaging, testing and adding Helm charts to 
 
 | Parameter             | Type   | Values                                                                                                                                              |
 | --------------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `action`              | string | Determines the action taken by the extension; valid options are `lint`, `package`, `test`, `publish`, `install` or `purge`                          |
+| `action`              | string | Determines the action taken by the extension; valid options are `lint`, `package`, `test`, `publish`, `diff`, `install` or `purge`                          |
 | `appVersion`          | string | Can be used to override the app version; defaults to `$ESTAFETTE_BUILD_VERSION`                                                                     |
 | `chart`               | string | The name of the chart and subdirectory where the chart is stored; defaults to `$ESTAFETTE_LABEL_APP` or `$ESTAFETTE_GIT_NAME` in that order         |
 | `credentials`         | string | To set a specific set of type `kubernetes-engine` credentials when using action `install`; defaults to the release target name prefixed with `gke-` |
@@ -141,6 +141,10 @@ releases:
         action: install
         namespace: mynamespace
         repoUrl: https://helm.estafette.io
+        values: |-
+          secret:
+            cloudflareApiEmail=bot@estafette.io
+            cloudflareApiKey=abc
 ```
 
 The install will try to use the package from the repository it's previously been pushed to. You can also use the local chart in the following way in order to install charts that haven't been published:
@@ -158,4 +162,23 @@ releases:
         image: extensions/helm:stable
         action: install
         namespace: mynamespace
+```
+
+### Diff
+
+The _diff_ action does everything the _install_ action does except for actually applying the changes, with the following snippet.
+
+```yaml
+releases:
+  development:
+    stages:
+      diff:
+        image: extensions/helm:stable
+        action: diff
+        namespace: mynamespace
+        repoUrl: https://helm.estafette.io
+        values: |-
+          secret:
+            cloudflareApiEmail=bot@estafette.io
+            cloudflareApiKey=abc
 ```

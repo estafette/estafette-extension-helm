@@ -211,7 +211,7 @@ func main() {
 			log.Printf("Found 0 files to purge")
 		}
 
-	case "install":
+	case "diff", "install":
 		log.Printf("Installing chart %v with app version %v and version %v...", params.Chart, params.AppVersion, params.Version)
 
 		if *credentialsJSON == "" {
@@ -312,21 +312,23 @@ func main() {
 		log.Printf("\nShowing template to be installed...\n")
 		runCommand("helm diff upgrade %v %v %v --namespace %v --allow-unreleased", params.ReleaseName, filename, overrideValuesFilesParameter, params.Namespace)
 
-		log.Printf("\nInstalling chart and waiting for %vs for it to be ready...\n", *params.Timeout)
-		err = runCommandExtended("helm upgrade --install %v %v %v --namespace %v --wait --timeout %v", params.ReleaseName, filename, overrideValuesFilesParameter, params.Namespace, *params.Timeout)
-		if err != nil {
-			log.Printf("Installation failed, showing logs...")
-			if params.Tillerless {
-				runCommand("cat %v", filepath.Join(homeDir, ".helm/plugins/helm-tiller/logs"))
+		if params.Action == "install" {
+			log.Printf("\nInstalling chart and waiting for %vs for it to be ready...\n", *params.Timeout)
+			err = runCommandExtended("helm upgrade --install %v %v %v --namespace %v --wait --timeout %v", params.ReleaseName, filename, overrideValuesFilesParameter, params.Namespace, *params.Timeout)
+			if err != nil {
+				log.Printf("Installation failed, showing logs...")
+				if params.Tillerless {
+					runCommand("cat %v", filepath.Join(homeDir, ".helm/plugins/helm-tiller/logs"))
+				}
+				runCommand("kubectl logs -l app.kubernetes.io/name=%v,app.kubernetes.io/instance=%v,app.kubernetes.io/version=%v -n %v --all-containers=true", params.Chart, params.ReleaseName, params.Version, params.Namespace)
+				os.Exit(1)
 			}
-			runCommand("kubectl logs -l app.kubernetes.io/name=%v,app.kubernetes.io/instance=%v,app.kubernetes.io/version=%v -n %v --all-containers=true", params.Chart, params.ReleaseName, params.Version, params.Namespace)
-			os.Exit(1)
-		}
 
-		log.Printf("\nShowing logs for container...\n")
-		runCommand("kubectl logs -l app.kubernetes.io/name=%v,app.kubernetes.io/instance=%v,app.kubernetes.io/version=%v -n %v --all-containers=true", params.Chart, params.ReleaseName, params.Version, params.Namespace)
+			log.Printf("\nShowing logs for container...\n")
+			runCommand("kubectl logs -l app.kubernetes.io/name=%v,app.kubernetes.io/instance=%v,app.kubernetes.io/version=%v -n %v --all-containers=true", params.Chart, params.ReleaseName, params.Version, params.Namespace)
+		}
 	default:
-		log.Fatalf("Action '%v' is not supported; please use action parameter value 'lint', 'package', 'test', 'publish', 'install' or 'purge'", params.Action)
+		log.Fatalf("Action '%v' is not supported; please use action parameter value 'lint', 'package', 'test', 'publish', 'diff', 'install' or 'purge'", params.Action)
 	}
 }
 
