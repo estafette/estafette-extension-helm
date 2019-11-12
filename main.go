@@ -114,7 +114,7 @@ func main() {
 
 		if params.Tillerless {
 			runCommand("helm init --client-only")
-			runCommand("kubectl create ns %v", params.TillerlessNamespace)
+			_ = runCommandExtended("kubectl create ns %v", params.TillerlessNamespace) // ignore errors
 			os.Setenv("HELM_TILLER_SILENT", "false")
 			os.Setenv("HELM_TILLER_LOGS", "true")
 			os.Setenv("HELM_TILLER_LOGS_DIR", filepath.Join(homeDir, ".helm/plugins/helm-tiller/logs"))
@@ -279,7 +279,7 @@ func main() {
 
 		if params.Tillerless {
 			runCommand("helm init --client-only")
-			runCommand("kubectl create ns %v", params.TillerlessNamespace)
+			_ = runCommandExtended("kubectl create ns %v", params.TillerlessNamespace) // ignore errors
 			os.Setenv("HELM_TILLER_SILENT", "false")
 			os.Setenv("HELM_TILLER_LOGS", "true")
 			os.Setenv("HELM_TILLER_LOGS_DIR", filepath.Join(homeDir, ".helm/plugins/helm-tiller/logs"))
