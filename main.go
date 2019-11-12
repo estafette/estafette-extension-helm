@@ -113,12 +113,13 @@ func main() {
 		runCommand("kubectl create clusterrolebinding tiller --clusterrole=cluster-admin --serviceaccount=kube-system:tiller")
 
 		if params.Tillerless {
+			runCommand("kubectl create ns %v", params.TillerlessNamespace)
 			os.Setenv("HELM_TILLER_SILENT", "false")
 			os.Setenv("HELM_TILLER_LOGS", "true")
 			os.Setenv("HELM_TILLER_LOGS_DIR", filepath.Join(homeDir, ".helm/plugins/helm-tiller/logs"))
 			os.Setenv("CREATE_NAMESPACE_IF_MISSING", "true")
-			runCommand("helm tiller start-ci helm-tillerless")
-			os.Setenv("TILLER_NAMESPACE", "helm-tillerless")
+			runCommand("helm tiller start-ci %v", params.TillerlessNamespace)
+			os.Setenv("TILLER_NAMESPACE", params.TillerlessNamespace)
 			os.Setenv("HELM_HOST", "127.0.0.1:44134")
 		} else {
 			runCommand("helm init --service-account tiller --wait")
@@ -277,12 +278,13 @@ func main() {
 		homeDir := usr.HomeDir
 
 		if params.Tillerless {
+			runCommand("kubectl create ns %v", params.TillerlessNamespace)
 			os.Setenv("HELM_TILLER_SILENT", "false")
 			os.Setenv("HELM_TILLER_LOGS", "true")
 			os.Setenv("HELM_TILLER_LOGS_DIR", filepath.Join(homeDir, ".helm/plugins/helm-tiller/logs"))
 			os.Setenv("CREATE_NAMESPACE_IF_MISSING", "true")
-			runCommand("helm tiller start-ci helm-tillerless")
-			os.Setenv("TILLER_NAMESPACE", "helm-tillerless")
+			runCommand("helm tiller start-ci %v", params.TillerlessNamespace)
+			os.Setenv("TILLER_NAMESPACE", params.TillerlessNamespace)
 			os.Setenv("HELM_HOST", "127.0.0.1:44134")
 		} else {
 			runCommand("helm init --service-account tiller --wait")
