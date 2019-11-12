@@ -144,6 +144,7 @@ func main() {
 		if err != nil {
 			log.Printf("Installation failed, showing logs...")
 			if params.Tillerless {
+				runCommand("ls -latr %v", filepath.Join(homeDir, ".helm/plugins/helm-tiller/logs"))
 				runCommand("cat %v", filepath.Join(homeDir, ".helm/plugins/helm-tiller/logs"))
 			}
 			runCommand("kubectl logs -l app.kubernetes.io/name=%v,app.kubernetes.io/instance=%v", params.Chart, params.Chart)
@@ -309,6 +310,7 @@ func main() {
 		if err != nil {
 			log.Printf("Installation failed, showing logs...")
 			if params.Tillerless {
+				runCommand("ls -latr %v", filepath.Join(homeDir, ".helm/plugins/helm-tiller/logs"))
 				runCommand("cat %v", filepath.Join(homeDir, ".helm/plugins/helm-tiller/logs"))
 			}
 			runCommand("kubectl logs -l app.kubernetes.io/name=%v,app.kubernetes.io/instance=%v,app.kubernetes.io/version=%v -n %v", params.Chart, params.ReleaseName, params.Version, params.Namespace)
