@@ -357,6 +357,7 @@ func runCommandExtended(command string, args ...interface{}) error {
 
 	log.Printf("> %v %v", c, strings.Join(a, " "))
 	cmd := exec.Command(c, a...)
+	cmd.Env = os.Environ()
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
@@ -371,6 +372,7 @@ func runCommandWithArgs(command string, args []string) {
 func runCommandWithArgsExtended(command string, args []string) error {
 	log.Printf("> %v %v", command, strings.Join(args, " "))
 	cmd := exec.Command(command, args...)
+	cmd.Env = os.Environ()
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
 	err := cmd.Run()
