@@ -113,7 +113,7 @@ func main() {
 		runCommand("kubectl create clusterrolebinding tiller --clusterrole=cluster-admin --serviceaccount=kube-system:tiller")
 
 		if params.Tillerless {
-			runCommand("helm init --client-only")
+			os.Setenv("HELM_TILLER_SILENT", "false")
 			runCommand("helm tiller start-ci helm-tillerless")
 			os.Setenv("TILLER_NAMESPACE", "helm-tillerless")
 			os.Setenv("HELM_HOST", "127.0.0.1:44134")
@@ -267,7 +267,7 @@ func main() {
 		runCommandWithArgs("gcloud", clustersGetCredentialsArsgs)
 
 		if params.Tillerless {
-			runCommand("helm init --client-only")
+			os.Setenv("HELM_TILLER_SILENT", "false")
 			runCommand("helm tiller start-ci helm-tillerless")
 			os.Setenv("TILLER_NAMESPACE", "helm-tillerless")
 			os.Setenv("HELM_HOST", "127.0.0.1:44134")
