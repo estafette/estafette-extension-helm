@@ -115,6 +115,7 @@ func main() {
 		if params.Tillerless {
 			runCommand("helm init --client-only")
 			runCommand("helm tiller start-ci helm-tillerless")
+			os.Setenv("TILLER_NAMESPACE", "helm-tillerless")
 			os.Setenv("HELM_HOST", "127.0.0.1:44134")
 		} else {
 			runCommand("helm init --service-account tiller --wait")
@@ -268,6 +269,7 @@ func main() {
 		if params.Tillerless {
 			runCommand("helm init --client-only")
 			runCommand("helm tiller start-ci helm-tillerless")
+			os.Setenv("TILLER_NAMESPACE", "helm-tillerless")
 			os.Setenv("HELM_HOST", "127.0.0.1:44134")
 		} else {
 			runCommand("helm init --service-account tiller --wait")
