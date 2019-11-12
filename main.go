@@ -115,7 +115,6 @@ func main() {
 		if params.Tillerless {
 			os.Setenv("HELM_TILLER_SILENT", "false")
 			os.Setenv("HELM_TILLER_LOGS", "true")
-			os.Setenv("HELM_TILLER_LOGS_DIR", "./tiller.log")
 			runCommand("helm tiller start-ci helm-tillerless")
 			os.Setenv("TILLER_NAMESPACE", "helm-tillerless")
 			os.Setenv("HELM_HOST", "127.0.0.1:44134")
@@ -145,7 +144,7 @@ func main() {
 		if err != nil {
 			log.Printf("Installation failed, showing logs...")
 			if params.Tillerless {
-				runCommand("cat ./tiller.log")
+				runCommand("cat %v", filepath.Join(homeDir, ".helm/plugins/helm-tiller/logs"))
 			}
 			runCommand("kubectl logs -l app.kubernetes.io/name=%v,app.kubernetes.io/instance=%v", params.Chart, params.Chart)
 			os.Exit(1)
@@ -271,10 +270,12 @@ func main() {
 		}
 		runCommandWithArgs("gcloud", clustersGetCredentialsArsgs)
 
+		usr, _ := user.Current()
+		homeDir := usr.HomeDir
+
 		if params.Tillerless {
 			os.Setenv("HELM_TILLER_SILENT", "false")
 			os.Setenv("HELM_TILLER_LOGS", "true")
-			os.Setenv("HELM_TILLER_LOGS_DIR", "./tiller.log")
 			runCommand("helm tiller start-ci helm-tillerless")
 			os.Setenv("TILLER_NAMESPACE", "helm-tillerless")
 			os.Setenv("HELM_HOST", "127.0.0.1:44134")
@@ -308,7 +309,7 @@ func main() {
 		if err != nil {
 			log.Printf("Installation failed, showing logs...")
 			if params.Tillerless {
-				runCommand("cat ./tiller.log")
+				runCommand("cat %v", filepath.Join(homeDir, ".helm/plugins/helm-tiller/logs"))
 			}
 			runCommand("kubectl logs -l app.kubernetes.io/name=%v,app.kubernetes.io/instance=%v,app.kubernetes.io/version=%v -n %v", params.Chart, params.ReleaseName, params.Version, params.Namespace)
 			os.Exit(1)
