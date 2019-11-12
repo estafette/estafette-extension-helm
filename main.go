@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/alecthomas/kingpin"
+	"github.com/logrusorgru/aurora"
 	"gopkg.in/yaml.v2"
 )
 
@@ -361,7 +362,7 @@ func runCommandExtended(command string, args ...interface{}) error {
 		a = commandArray[1:]
 	}
 
-	log.Printf("> %v %v", c, strings.Join(a, " "))
+	log.Printf(aurora.Gray(12, "> %v %v").String(), c, strings.Join(a, " "))
 	cmd := exec.Command(c, a...)
 	cmd.Env = os.Environ()
 	cmd.Stdout = os.Stdout
@@ -376,7 +377,8 @@ func runCommandWithArgs(command string, args []string) {
 }
 
 func runCommandWithArgsExtended(command string, args []string) error {
-	log.Printf("> %v %v", command, strings.Join(args, " "))
+	log.Printf(aurora.Gray(12, "> %v %v").String(), command, strings.Join(args, " "))
+
 	cmd := exec.Command(command, args...)
 	cmd.Env = os.Environ()
 	cmd.Stdout = os.Stdout
