@@ -71,7 +71,7 @@ func (p *params) SetDefaults(gitName string, appLabel string, buildVersion strin
 	}
 
 	if p.TillerlessNamespace == "" {
-		p.TillerlessNamespace = "helm-tillerless"
+		p.TillerlessNamespace = "helm"
 	}
 
 	// default credentials to release name prefixed with gke if no override in stage params

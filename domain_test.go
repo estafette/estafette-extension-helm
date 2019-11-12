@@ -389,7 +389,7 @@ func TestSetDefaults(t *testing.T) {
 		assert.Equal(t, "myrelease", params.ReleaseName)
 	})
 
-	t.Run("SetsTillerlessNamespaceToHelmTillerlessIfEmpty", func(t *testing.T) {
+	t.Run("SetsTillerlessNamespaceToHelmIfEmpty", func(t *testing.T) {
 
 		gitName := "git-name"
 		appLabel := "app-label"
@@ -403,7 +403,7 @@ func TestSetDefaults(t *testing.T) {
 		// act
 		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName)
 
-		assert.Equal(t, "helm-tillerless", params.TillerlessNamespace)
+		assert.Equal(t, "helm", params.TillerlessNamespace)
 	})
 
 	t.Run("KeepsTillerlessNamespaceIfSet", func(t *testing.T) {
