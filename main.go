@@ -113,7 +113,7 @@ func main() {
 		runCommand("kubectl -n kube-system create serviceaccount tiller")
 		runCommand("kubectl create clusterrolebinding tiller --clusterrole=cluster-admin --serviceaccount=kube-system:tiller")
 
-		if params.Tillerless {
+		if *params.Tillerless {
 			runCommand("helm init --client-only")
 			_ = runCommandExtended("kubectl create ns %v", params.TillerlessNamespace) // ignore errors
 			os.Setenv("HELM_TILLER_SILENT", "false")
@@ -148,9 +148,10 @@ func main() {
 
 		if err != nil {
 			log.Printf("Installation failed, showing logs...")
-			if params.Tillerless {
+			if *params.Tillerless {
 				runCommand("cat %v", filepath.Join(homeDir, ".helm/plugins/helm-tiller/logs"))
 			}
+			runCommand("kubectl get all")
 			runCommand("kubectl logs -l app.kubernetes.io/name=%v,app.kubernetes.io/instance=%v --all-containers=true", params.Chart, params.Chart)
 			os.Exit(1)
 		}
@@ -278,7 +279,7 @@ func main() {
 		usr, _ := user.Current()
 		homeDir := usr.HomeDir
 
-		if params.Tillerless {
+		if *params.Tillerless {
 			runCommand("helm init --client-only")
 			_ = runCommandExtended("kubectl create ns %v", params.TillerlessNamespace) // ignore errors
 			os.Setenv("HELM_TILLER_SILENT", "false")
@@ -318,7 +319,7 @@ func main() {
 			err = runCommandExtended("helm upgrade --install %v %v %v --namespace %v --wait --timeout %v", params.ReleaseName, filename, overrideValuesFilesParameter, params.Namespace, *params.Timeout)
 			if err != nil {
 				log.Printf("Installation failed, showing logs...")
-				if params.Tillerless {
+				if *params.Tillerless {
 					runCommand("cat %v", filepath.Join(homeDir, ".helm/plugins/helm-tiller/logs"))
 				}
 				runCommand("kubectl logs -l app.kubernetes.io/name=%v,app.kubernetes.io/instance=%v,app.kubernetes.io/version=%v -n %v --all-containers=true", params.Chart, params.ReleaseName, params.Version, params.Namespace)

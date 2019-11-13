@@ -389,6 +389,45 @@ func TestSetDefaults(t *testing.T) {
 		assert.Equal(t, "myrelease", params.ReleaseName)
 	})
 
+	t.Run("SetsTillerlessToTrueIfEmpty", func(t *testing.T) {
+
+		gitName := "git-name"
+		appLabel := "app-label"
+		buildVersion := "1.0.0"
+		releaseTargetName := ""
+
+		params := params{
+			Tillerless: nil,
+		}
+
+		// act
+		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName)
+
+		if assert.NotNil(t, params.Tillerless) {
+			assert.Equal(t, true, *params.Tillerless)
+		}
+	})
+
+	t.Run("KeepsTillerlessIfSet", func(t *testing.T) {
+
+		gitName := "git-name"
+		appLabel := "app-label"
+		buildVersion := "1.0.0"
+		releaseTargetName := ""
+
+		falseValue := false
+		params := params{
+			Tillerless: &falseValue,
+		}
+
+		// act
+		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName)
+
+		if assert.NotNil(t, params.Tillerless) {
+			assert.Equal(t, false, *params.Tillerless)
+		}
+	})
+
 	t.Run("SetsTillerlessNamespaceToHelmExtensionReleasesIfEmpty", func(t *testing.T) {
 
 		gitName := "git-name"
