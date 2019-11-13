@@ -53,21 +53,21 @@ func main() {
 		log.Fatal("Failed unmarshalling parameters: ", err)
 	}
 
-	log.Printf("Setting defaults for parameters that are not set in the manifest...")
+	zerolog.Info().Msg("Setting defaults for parameters that are not set in the manifest...")
 	params.SetDefaults(*gitName, *appLabel, *buildVersion, *releaseTargetName)
 
 	switch params.Action {
 	case
 		"lint":
-		log.Printf("Linting chart %v...", params.Chart)
+		zerolog.Info().Msgf("Linting chart %v...", params.Chart)
 		foundation.RunCommand("helm lint %v", filepath.Join(params.HelmSubdirectory, params.Chart))
 
 	case "package":
-		log.Printf("Packaging chart %v with app version %v and version %v...", params.Chart, params.AppVersion, params.Version)
+		zerolog.Info().Msgf("Packaging chart %v with app version %v and version %v...", params.Chart, params.AppVersion, params.Version)
 		foundation.RunCommand("helm package --save=false --app-version %v --version %v %v", params.AppVersion, params.Version, filepath.Join(params.HelmSubdirectory, params.Chart))
 
 	case "test":
-		log.Printf("Testing chart %v with app version %v and version %v on kind host %v...", params.Chart, params.AppVersion, params.Version, params.KindHost)
+		zerolog.Info().Msgf("Testing chart %v with app version %v and version %v on kind host %v...", params.Chart, params.AppVersion, params.Version, params.KindHost)
 
 		log.Printf("\nWaiting for kind host to be ready...\n")
 		httpClient := &http.Client{
@@ -177,7 +177,7 @@ func main() {
 		foundation.RunCommand("git push origin master")
 
 	case "purge":
-		log.Printf("Purging pre-release version for chart %v with versions '%v-.+'...", params.Chart, params.Version)
+		zerolog.Info().Msgf("Purging pre-release version for chart %v with versions '%v-.+'...", params.Chart, params.Version)
 
 		foundation.RunCommand("mkdir -p %v/%v", params.RepositoryDirectory, params.RepositoryChartsSubdirectory)
 		err = os.Chdir(params.RepositoryDirectory)
@@ -209,7 +209,7 @@ func main() {
 		}
 
 	case "diff", "install":
-		log.Printf("Installing chart %v with app version %v and version %v...", params.Chart, params.AppVersion, params.Version)
+		zerolog.Info().Msgf("Installing chart %v with app version %v and version %v...", params.Chart, params.AppVersion, params.Version)
 
 		if *credentialsJSON == "" {
 			log.Fatal("Credentials of type kubernetes-engine are not injected; configure this extension as trusted and inject credentials of type kubernetes-engine")
@@ -326,6 +326,6 @@ func main() {
 			foundation.RunCommand("kubectl logs -l app.kubernetes.io/instance=%v -n %v --all-containers=true", params.Chart, params.ReleaseName, params.Version, params.Namespace)
 		}
 	default:
-		log.Fatalf("Action '%v' is not supported; please use action parameter value 'lint', 'package', 'test', 'publish', 'diff', 'install' or 'purge'", params.Action)
+		zerolog.Fatal().Msgf("Action '%v' is not supported; please use action parameter value 'lint', 'package', 'test', 'publish', 'diff', 'install' or 'purge'", params.Action)
 	}
 }
