@@ -7,7 +7,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"os/exec"
 	"os/user"
 	"path/filepath"
 	"runtime"
@@ -15,7 +14,8 @@ import (
 	"time"
 
 	"github.com/alecthomas/kingpin"
-	"github.com/logrusorgru/aurora"
+	foundation "github.com/estafette/estafette-foundation"
+	zerolog "github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v2"
 )
 
@@ -44,14 +44,9 @@ func main() {
 	// parse command line parameters
 	kingpin.Parse()
 
-	// log to stdout and hide timestamp
-	log.SetOutput(os.Stdout)
-	log.SetFlags(log.Flags() &^ (log.Ldate | log.Ltime))
+	foundation.InitConsoleLogging(appgroup, app, version, branch, revision, buildDate)
 
-	// log startup message
-	log.Printf("Starting % version %v...", app, version)
-
-	log.Printf("Unmarshalling parameters / custom properties...")
+	zerolog.Info().Msg("Unmarshalling parameters / custom properties...")
 	var params params
 	err := yaml.Unmarshal([]byte(*paramsYAML), &params)
 	if err != nil {
@@ -65,11 +60,11 @@ func main() {
 	case
 		"lint":
 		log.Printf("Linting chart %v...", params.Chart)
-		runCommand("helm lint %v", filepath.Join(params.HelmSubdirectory, params.Chart))
+		foundation.RunCommand("helm lint %v", filepath.Join(params.HelmSubdirectory, params.Chart))
 
 	case "package":
 		log.Printf("Packaging chart %v with app version %v and version %v...", params.Chart, params.AppVersion, params.Version)
-		runCommand("helm package --save=false --app-version %v --version %v %v", params.AppVersion, params.Version, filepath.Join(params.HelmSubdirectory, params.Chart))
+		foundation.RunCommand("helm package --save=false --app-version %v --version %v %v", params.AppVersion, params.Version, filepath.Join(params.HelmSubdirectory, params.Chart))
 
 	case "test":
 		log.Printf("Testing chart %v with app version %v and version %v on kind host %v...", params.Chart, params.AppVersion, params.Version, params.KindHost)
@@ -110,23 +105,23 @@ func main() {
 			log.Fatal("Failed writing ~/.kube/config: ", err)
 		}
 
-		runCommand("kubectl -n kube-system create serviceaccount tiller")
-		runCommand("kubectl create clusterrolebinding tiller --clusterrole=cluster-admin --serviceaccount=kube-system:tiller")
+		foundation.RunCommand("kubectl -n kube-system create serviceaccount tiller")
+		foundation.RunCommand("kubectl create clusterrolebinding tiller --clusterrole=cluster-admin --serviceaccount=kube-system:tiller")
 
 		if *params.Tillerless {
-			runCommand("helm init --client-only")
-			_ = runCommandExtended("kubectl create ns %v", params.TillerlessNamespace) // ignore errors
+			foundation.RunCommand("helm init --client-only")
+			_ = foundation.RunCommandExtended("kubectl create ns %v", params.TillerlessNamespace) // ignore errors
 			os.Setenv("HELM_TILLER_SILENT", "false")
 			os.Setenv("HELM_TILLER_LOGS", "true")
 			os.Setenv("HELM_TILLER_LOGS_DIR", filepath.Join(homeDir, ".helm/plugins/helm-tiller/logs"))
 			os.Setenv("CREATE_NAMESPACE_IF_MISSING", "true")
-			runCommand("helm tiller start-ci %v", params.TillerlessNamespace)
+			foundation.RunCommand("helm tiller start-ci %v", params.TillerlessNamespace)
 			os.Setenv("TILLER_NAMESPACE", params.TillerlessNamespace)
 			os.Setenv("HELM_HOST", "127.0.0.1:44134")
 		} else {
-			runCommand("helm init --service-account tiller --wait")
+			foundation.RunCommand("helm init --service-account tiller --wait")
 		}
-		runCommand("helm version")
+		foundation.RunCommand("helm version")
 
 		overrideValuesFilesParameter := ""
 		if params.Values != "" {
@@ -136,55 +131,55 @@ func main() {
 				log.Fatal("Failed writing override.yaml: ", err)
 			}
 			overrideValuesFilesParameter = "-f override.yaml"
-			runCommand("cat override.yaml")
+			foundation.RunCommand("cat override.yaml")
 		}
 
 		filename := fmt.Sprintf("%v-%v.tgz", params.Chart, params.Version)
 		log.Printf("\nShowing template to be installed...\n")
-		runCommand("helm diff upgrade %v %v %v --allow-unreleased", params.Chart, filename, overrideValuesFilesParameter)
+		foundation.RunCommand("helm diff upgrade %v %v %v --allow-unreleased", params.Chart, filename, overrideValuesFilesParameter)
 
 		log.Printf("\nInstalling chart file %v and waiting for %vs for it to be ready...\n", filename, *params.Timeout)
-		err = runCommandExtended("helm upgrade --install %v %v %v --wait --timeout %v", params.Chart, filename, overrideValuesFilesParameter, *params.Timeout)
+		err = foundation.RunCommandExtended("helm upgrade --install %v %v %v --wait --timeout %v", params.Chart, filename, overrideValuesFilesParameter, *params.Timeout)
 
 		if err != nil {
 			log.Printf("Installation failed, showing logs...")
 			if *params.Tillerless {
-				runCommand("cat %v", filepath.Join(homeDir, ".helm/plugins/helm-tiller/logs"))
+				foundation.RunCommand("cat %v", filepath.Join(homeDir, ".helm/plugins/helm-tiller/logs"))
 			}
-			runCommand("kubectl get all")
-			runCommand("kubectl logs -l app.kubernetes.io/instance=%v --all-containers=true", params.Chart, params.Chart)
+			foundation.RunCommand("kubectl get all")
+			foundation.RunCommand("kubectl logs -l app.kubernetes.io/instance=%v --all-containers=true", params.Chart, params.Chart)
 			os.Exit(1)
 		}
 
 		log.Printf("\nShowing logs for container...\n")
-		runCommand("kubectl logs -l app.kubernetes.io/instance=%v --all-containers=true", params.Chart, params.Chart)
+		foundation.RunCommand("kubectl logs -l app.kubernetes.io/instance=%v --all-containers=true", params.Chart, params.Chart)
 
 	case "publish":
 		log.Printf("Publishing chart %v with app version %v and version %v...", params.Chart, params.AppVersion, params.Version)
 
 		filename := fmt.Sprintf("%v-%v.tgz", params.Chart, params.Version)
-		runCommand("mkdir -p %v/%v", params.RepositoryDirectory, params.RepositoryChartsSubdirectory)
-		runCommand("cp %v %v/%v", filename, params.RepositoryDirectory, params.RepositoryChartsSubdirectory)
+		foundation.RunCommand("mkdir -p %v/%v", params.RepositoryDirectory, params.RepositoryChartsSubdirectory)
+		foundation.RunCommand("cp %v %v/%v", filename, params.RepositoryDirectory, params.RepositoryChartsSubdirectory)
 		err = os.Chdir(params.RepositoryDirectory)
 		if err != nil {
 			log.Fatalf("Failed changing directory to %v; %v", params.RepositoryDirectory, err)
 		}
 
 		log.Printf("\nGenerating/updating index file for repository %v...\n", params.RepositoryURL)
-		runCommand("helm repo index --url %v .", params.RepositoryURL)
+		foundation.RunCommand("helm repo index --url %v .", params.RepositoryURL)
 
 		log.Printf("\nPushing changes to repository...\n")
-		runCommandWithArgs("git", []string{"config", "--global", "user.email", "'bot@estafette.io'"})
-		runCommandWithArgs("git", []string{"config", "--global", "user.name", "'estafette-bot'"})
-		runCommand("git status")
-		runCommand("git add --all")
-		runCommandWithArgs("git", []string{"commit", "--allow-empty", "-m", fmt.Sprintf("'%v v%v'", params.Chart, params.Version)})
-		runCommand("git push origin master")
+		foundation.RunCommandWithArgs("git", []string{"config", "--global", "user.email", "'bot@estafette.io'"})
+		foundation.RunCommandWithArgs("git", []string{"config", "--global", "user.name", "'estafette-bot'"})
+		foundation.RunCommand("git status")
+		foundation.RunCommand("git add --all")
+		foundation.RunCommandWithArgs("git", []string{"commit", "--allow-empty", "-m", fmt.Sprintf("'%v v%v'", params.Chart, params.Version)})
+		foundation.RunCommand("git push origin master")
 
 	case "purge":
 		log.Printf("Purging pre-release version for chart %v with versions '%v-.+'...", params.Chart, params.Version)
 
-		runCommand("mkdir -p %v/%v", params.RepositoryDirectory, params.RepositoryChartsSubdirectory)
+		foundation.RunCommand("mkdir -p %v/%v", params.RepositoryDirectory, params.RepositoryChartsSubdirectory)
 		err = os.Chdir(params.RepositoryDirectory)
 		if err != nil {
 			log.Fatalf("Failed changing directory to %v; %v", params.RepositoryDirectory, err)
@@ -197,17 +192,17 @@ func main() {
 			log.Fatalf("Failed globbing %v; %v", filesGlob, err)
 		}
 		if len(files) > 0 {
-			runCommand("rm -f %v", strings.Join(files, " "))
+			foundation.RunCommand("rm -f %v", strings.Join(files, " "))
 
 			log.Printf("\nGenerating/updating index file for repository %v...\n", params.RepositoryURL)
-			runCommand("helm repo index --url %v .", params.RepositoryURL)
+			foundation.RunCommand("helm repo index --url %v .", params.RepositoryURL)
 
 			log.Printf("\nPushing changes to repository...\n")
-			runCommandWithArgs("git", []string{"config", "--global", "user.email", "'bot@estafette.io'"})
-			runCommandWithArgs("git", []string{"config", "--global", "user.name", "'estafette-bot'"})
-			runCommand("git add --all")
-			runCommandWithArgs("git", []string{"commit", "--allow-empty", "-m", fmt.Sprintf("'purged %v v%v-.+'", params.Chart, params.Version)})
-			runCommand("git push origin master")
+			foundation.RunCommandWithArgs("git", []string{"config", "--global", "user.email", "'bot@estafette.io'"})
+			foundation.RunCommandWithArgs("git", []string{"config", "--global", "user.name", "'estafette-bot'"})
+			foundation.RunCommand("git add --all")
+			foundation.RunCommandWithArgs("git", []string{"commit", "--allow-empty", "-m", fmt.Sprintf("'purged %v v%v-.+'", params.Chart, params.Version)})
+			foundation.RunCommand("git push origin master")
 
 		} else {
 			log.Printf("Found 0 files to purge")
@@ -257,13 +252,13 @@ func main() {
 		}
 
 		log.Printf("Authenticating to google cloud")
-		runCommandWithArgs("gcloud", []string{"auth", "activate-service-account", saClientEmail, "--key-file", "/key-file.json"})
+		foundation.RunCommandWithArgs("gcloud", []string{"auth", "activate-service-account", saClientEmail, "--key-file", "/key-file.json"})
 
 		log.Printf("Setting gcloud account to %v", saClientEmail)
-		runCommandWithArgs("gcloud", []string{"config", "set", "account", saClientEmail})
+		foundation.RunCommandWithArgs("gcloud", []string{"config", "set", "account", saClientEmail})
 
 		log.Printf("Setting gcloud project")
-		runCommandWithArgs("gcloud", []string{"config", "set", "project", credential.AdditionalProperties.Project})
+		foundation.RunCommandWithArgs("gcloud", []string{"config", "set", "project", credential.AdditionalProperties.Project})
 
 		log.Printf("Getting gke credentials for cluster %v", credential.AdditionalProperties.Cluster)
 		clustersGetCredentialsArsgs := []string{"container", "clusters", "get-credentials", credential.AdditionalProperties.Cluster}
@@ -274,25 +269,25 @@ func main() {
 		} else {
 			log.Fatal("Credentials have no zone or region; at least one of them has to be defined")
 		}
-		runCommandWithArgs("gcloud", clustersGetCredentialsArsgs)
+		foundation.RunCommandWithArgs("gcloud", clustersGetCredentialsArsgs)
 
 		usr, _ := user.Current()
 		homeDir := usr.HomeDir
 
 		if *params.Tillerless {
-			runCommand("helm init --client-only")
-			_ = runCommandExtended("kubectl create ns %v", params.TillerlessNamespace) // ignore errors
+			foundation.RunCommand("helm init --client-only")
+			_ = foundation.RunCommandExtended("kubectl create ns %v", params.TillerlessNamespace) // ignore errors
 			os.Setenv("HELM_TILLER_SILENT", "false")
 			os.Setenv("HELM_TILLER_LOGS", "true")
 			os.Setenv("HELM_TILLER_LOGS_DIR", filepath.Join(homeDir, ".helm/plugins/helm-tiller/logs"))
 			os.Setenv("CREATE_NAMESPACE_IF_MISSING", "true")
-			runCommand("helm tiller start-ci %v", params.TillerlessNamespace)
+			foundation.RunCommand("helm tiller start-ci %v", params.TillerlessNamespace)
 			os.Setenv("TILLER_NAMESPACE", params.TillerlessNamespace)
 			os.Setenv("HELM_HOST", "127.0.0.1:44134")
 		} else {
-			runCommand("helm init --service-account tiller --wait")
+			foundation.RunCommand("helm init --service-account tiller --wait")
 		}
-		runCommand("helm version")
+		foundation.RunCommand("helm version")
 
 		overrideValuesFilesParameter := ""
 		if params.Values != "" {
@@ -302,97 +297,35 @@ func main() {
 				log.Fatal("Failed writing override.yaml: ", err)
 			}
 			overrideValuesFilesParameter = "-f override.yaml"
-			runCommand("cat override.yaml")
+			foundation.RunCommand("cat override.yaml")
 		}
 
 		filename := fmt.Sprintf("%v-%v.tgz", params.Chart, params.Version)
-		if !fileExists(filename) {
+		if !foundation.FileExists(filename) {
 			log.Printf("\nNo helm package present, retrieving helm chart %v version %v from %v...\n", params.Chart, params.Version, params.RepositoryURL)
-			runCommand("helm fetch %v --version %v --repo %v", params.Chart, params.Version, params.RepositoryURL)
+			foundation.RunCommand("helm fetch %v --version %v --repo %v", params.Chart, params.Version, params.RepositoryURL)
 		}
 
 		log.Printf("\nShowing template to be installed...\n")
-		runCommand("helm diff upgrade %v %v %v --namespace %v --allow-unreleased", params.ReleaseName, filename, overrideValuesFilesParameter, params.Namespace)
+		foundation.RunCommand("helm diff upgrade %v %v %v --namespace %v --allow-unreleased", params.ReleaseName, filename, overrideValuesFilesParameter, params.Namespace)
 
 		if params.Action == "install" {
 			log.Printf("\nInstalling chart and waiting for %vs for it to be ready...\n", *params.Timeout)
-			err = runCommandExtended("helm upgrade --install %v %v %v --namespace %v --wait --timeout %v", params.ReleaseName, filename, overrideValuesFilesParameter, params.Namespace, *params.Timeout)
+			err = foundation.RunCommandExtended("helm upgrade --install %v %v %v --namespace %v --wait --timeout %v", params.ReleaseName, filename, overrideValuesFilesParameter, params.Namespace, *params.Timeout)
 			if err != nil {
 				log.Printf("Installation failed, showing logs...")
 				if *params.Tillerless {
-					runCommand("cat %v", filepath.Join(homeDir, ".helm/plugins/helm-tiller/logs"))
+					foundation.RunCommand("cat %v", filepath.Join(homeDir, ".helm/plugins/helm-tiller/logs"))
 				}
-				runCommand("kubectl get all -n %v", params.Namespace)
-				runCommand("kubectl logs -l app.kubernetes.io/instance=%v -n %v --all-containers=true", params.Chart, params.ReleaseName, params.Version, params.Namespace)
+				foundation.RunCommand("kubectl get all -n %v", params.Namespace)
+				foundation.RunCommand("kubectl logs -l app.kubernetes.io/instance=%v -n %v --all-containers=true", params.Chart, params.ReleaseName, params.Version, params.Namespace)
 				os.Exit(1)
 			}
 
 			log.Printf("\nShowing logs for container...\n")
-			runCommand("kubectl logs -l app.kubernetes.io/instance=%v -n %v --all-containers=true", params.Chart, params.ReleaseName, params.Version, params.Namespace)
+			foundation.RunCommand("kubectl logs -l app.kubernetes.io/instance=%v -n %v --all-containers=true", params.Chart, params.ReleaseName, params.Version, params.Namespace)
 		}
 	default:
 		log.Fatalf("Action '%v' is not supported; please use action parameter value 'lint', 'package', 'test', 'publish', 'diff', 'install' or 'purge'", params.Action)
 	}
-}
-
-func handleError(err error) {
-	if err != nil {
-		log.Fatal(err)
-	}
-}
-
-func runCommand(command string, args ...interface{}) {
-	err := runCommandExtended(command, args...)
-	handleError(err)
-}
-
-func runCommandExtended(command string, args ...interface{}) error {
-	command = fmt.Sprintf(command, args...)
-
-	// trim spaces and de-dupe spaces in string
-	command = strings.ReplaceAll(command, "  ", " ")
-	command = strings.Trim(command, " ")
-
-	// split into actual command and arguments
-	commandArray := strings.Split(command, " ")
-	var c string
-	var a []string
-	if len(commandArray) > 0 {
-		c = commandArray[0]
-	}
-	if len(commandArray) > 1 {
-		a = commandArray[1:]
-	}
-
-	log.Printf(aurora.Gray(18, "> %v %v").String(), c, strings.Join(a, " "))
-	cmd := exec.Command(c, a...)
-	cmd.Env = os.Environ()
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	err := cmd.Run()
-	return err
-}
-
-func runCommandWithArgs(command string, args []string) {
-	err := runCommandWithArgsExtended(command, args)
-	handleError(err)
-}
-
-func runCommandWithArgsExtended(command string, args []string) error {
-	log.Printf(aurora.Gray(18, "> %v %v").String(), command, strings.Join(args, " "))
-
-	cmd := exec.Command(command, args...)
-	cmd.Env = os.Environ()
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	err := cmd.Run()
-	return err
-}
-
-func fileExists(filename string) bool {
-	info, err := os.Stat(filename)
-	if os.IsNotExist(err) {
-		return false
-	}
-	return !info.IsDir()
 }
