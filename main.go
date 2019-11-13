@@ -322,6 +322,7 @@ func main() {
 				if *params.Tillerless {
 					runCommand("cat %v", filepath.Join(homeDir, ".helm/plugins/helm-tiller/logs"))
 				}
+				runCommand("kubectl get all -n %v", params.Namespace)
 				runCommand("kubectl logs -l app.kubernetes.io/name=%v,app.kubernetes.io/instance=%v,app.kubernetes.io/version=%v -n %v --all-containers=true", params.Chart, params.ReleaseName, params.Version, params.Namespace)
 				os.Exit(1)
 			}
