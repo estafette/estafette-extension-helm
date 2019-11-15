@@ -52,12 +52,9 @@ Testing depends on Estafette's service containers to provide a Kubernetes enviro
     services:
     - name: kubernetes
       image: bsycorp/kind:latest-1.12
-      ports:
-      - port: 8443
-      - port: 10080
-        readiness:
-          path: /kubernetes-ready
-          timeoutSeconds: 180
+      readiness:
+        path: /kubernetes-ready
+        port: 10080
     image: extensions/helm:stable
     action: test
     values: |-
