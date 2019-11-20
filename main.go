@@ -147,12 +147,12 @@ func main() {
 				foundation.RunCommand("cat %v", filepath.Join(homeDir, ".helm/plugins/helm-tiller/logs"))
 			}
 			foundation.RunCommand("kubectl get all")
-			foundation.RunCommand("kubectl logs -l app.kubernetes.io/instance=%v --all-containers=true", params.Chart, params.Chart)
+			foundation.RunCommand("kubectl logs -l app.kubernetes.io/instance=%v --all-containers=true", params.Chart)
 			os.Exit(1)
 		}
 
 		log.Printf("\nShowing logs for container...\n")
-		foundation.RunCommand("kubectl logs -l app.kubernetes.io/instance=%v --all-containers=true", params.Chart, params.Chart)
+		foundation.RunCommand("kubectl logs -l app.kubernetes.io/instance=%v --all-containers=true", params.Chart)
 
 	case "publish":
 		log.Printf("Publishing chart %v with app version %v and version %v...", params.Chart, params.AppVersion, params.Version)
@@ -318,12 +318,12 @@ func main() {
 					foundation.RunCommand("cat %v", filepath.Join(homeDir, ".helm/plugins/helm-tiller/logs"))
 				}
 				foundation.RunCommand("kubectl get all -n %v", params.Namespace)
-				foundation.RunCommand("kubectl logs -l app.kubernetes.io/instance=%v -n %v --all-containers=true", params.Chart, params.ReleaseName, params.Version, params.Namespace)
+				foundation.RunCommand("kubectl logs -l app.kubernetes.io/instance=%v -n %v --all-containers=true", params.ReleaseName, params.Namespace)
 				os.Exit(1)
 			}
 
 			log.Printf("\nShowing logs for container...\n")
-			foundation.RunCommand("kubectl logs -l app.kubernetes.io/instance=%v -n %v --all-containers=true", params.Chart, params.ReleaseName, params.Version, params.Namespace)
+			foundation.RunCommand("kubectl logs -l app.kubernetes.io/instance=%v -n %v --all-containers=true", params.ReleaseName, params.Namespace)
 		}
 	default:
 		zerolog.Fatal().Msgf("Action '%v' is not supported; please use action parameter value 'lint', 'package', 'test', 'publish', 'diff', 'install' or 'purge'", params.Action)
