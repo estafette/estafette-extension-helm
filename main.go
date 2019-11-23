@@ -44,7 +44,8 @@ func main() {
 	// parse command line parameters
 	kingpin.Parse()
 
-	foundation.InitConsoleLogging(appgroup, app, version, branch, revision, buildDate)
+	// init log format from envvar ESTAFETTE_LOG_FORMAT
+	foundation.InitLoggingFromEnv(appgroup, app, version, branch, revision, buildDate)
 
 	zerolog.Info().Msg("Unmarshalling parameters / custom properties...")
 	var params params
