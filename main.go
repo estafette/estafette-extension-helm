@@ -106,24 +106,6 @@ func main() {
 			log.Fatal("Failed writing ~/.kube/config: ", err)
 		}
 
-		foundation.RunCommand("kubectl -n kube-system create serviceaccount tiller")
-		foundation.RunCommand("kubectl create clusterrolebinding tiller --clusterrole=cluster-admin --serviceaccount=kube-system:tiller")
-
-		if *params.Tillerless {
-			foundation.RunCommand("helm init --client-only")
-			_ = foundation.RunCommandExtended("kubectl create ns %v", params.TillerlessNamespace) // ignore errors
-			os.Setenv("HELM_TILLER_SILENT", "false")
-			os.Setenv("HELM_TILLER_LOGS", "true")
-			os.Setenv("HELM_TILLER_LOGS_DIR", filepath.Join(homeDir, ".helm/plugins/helm-tiller/logs"))
-			os.Setenv("CREATE_NAMESPACE_IF_MISSING", "true")
-			foundation.RunCommand("helm tiller start-ci %v", params.TillerlessNamespace)
-			os.Setenv("TILLER_NAMESPACE", params.TillerlessNamespace)
-			os.Setenv("HELM_HOST", "127.0.0.1:44134")
-		} else {
-			foundation.RunCommand("helm init --service-account tiller --wait")
-		}
-		foundation.RunCommand("helm version")
-
 		overrideValuesFilesParameter := ""
 		if params.Values != "" {
 			log.Printf("\nWriting values to override.yaml...\n")
@@ -144,9 +126,6 @@ func main() {
 
 		if err != nil {
 			log.Printf("Installation failed, showing logs...")
-			if *params.Tillerless {
-				foundation.RunCommand("cat %v", filepath.Join(homeDir, ".helm/plugins/helm-tiller/logs"))
-			}
 			foundation.RunCommand("kubectl get all")
 			foundation.RunCommand("kubectl logs -l app.kubernetes.io/instance=%v --all-containers=true", params.Chart)
 			os.Exit(1)
@@ -272,24 +251,6 @@ func main() {
 		}
 		foundation.RunCommandWithArgs("gcloud", clustersGetCredentialsArsgs)
 
-		usr, _ := user.Current()
-		homeDir := usr.HomeDir
-
-		if *params.Tillerless {
-			foundation.RunCommand("helm init --client-only")
-			_ = foundation.RunCommandExtended("kubectl create ns %v", params.TillerlessNamespace) // ignore errors
-			os.Setenv("HELM_TILLER_SILENT", "false")
-			os.Setenv("HELM_TILLER_LOGS", "true")
-			os.Setenv("HELM_TILLER_LOGS_DIR", filepath.Join(homeDir, ".helm/plugins/helm-tiller/logs"))
-			os.Setenv("CREATE_NAMESPACE_IF_MISSING", "true")
-			foundation.RunCommand("helm tiller start-ci %v", params.TillerlessNamespace)
-			os.Setenv("TILLER_NAMESPACE", params.TillerlessNamespace)
-			os.Setenv("HELM_HOST", "127.0.0.1:44134")
-		} else {
-			foundation.RunCommand("helm init --service-account tiller --wait")
-		}
-		foundation.RunCommand("helm version")
-
 		overrideValuesFilesParameter := ""
 		if params.Values != "" {
 			log.Printf("\nWriting values to override.yaml...\n")
@@ -315,9 +276,6 @@ func main() {
 			err = foundation.RunCommandExtended("helm upgrade --install %v %v %v --namespace %v --wait --timeout %v", params.ReleaseName, filename, overrideValuesFilesParameter, params.Namespace, *params.Timeout)
 			if err != nil {
 				log.Printf("Installation failed, showing logs...")
-				if *params.Tillerless {
-					foundation.RunCommand("cat %v", filepath.Join(homeDir, ".helm/plugins/helm-tiller/logs"))
-				}
 				foundation.RunCommand("kubectl get all -n %v", params.Namespace)
 				foundation.RunCommand("kubectl logs -l app.kubernetes.io/instance=%v -n %v --all-containers=true", params.ReleaseName, params.Namespace)
 				os.Exit(1)

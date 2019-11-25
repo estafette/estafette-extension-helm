@@ -17,8 +17,6 @@ This extension helps with linting, packaging, testing and adding Helm charts to 
 | `repoDir`             | string | The directory into which the chart repository is cloned; defaults to `helm-charts`                                                                  |
 | `repoChartsSubdir`    | string | The subdirectory of the chart repository into which the tgz files are copied; defaults to `charts`                                                  |
 | `repoUrl`             | string | The full url towards the helm repository, to be used to generate the `index.yaml` file; defaults to `https://helm.estafette.io/`                    |
-| `tillerless`          | bool   | When true the tillerless plugin is used to `install` the chart; otherwise Tiller needs to be preinstalled in the cluster; defaults to true          |
-| `tillerlessNamespace` | string | Sets the namespace where tillerless stores its state; defaults to `helm-extension-releases`                                                         |
 | `timeout`             | int    | The time in seconds to wait for install during the `test` action to finish; defaults to 200 seconds                                                 |
 | `values`              | string | Contents of a values.yaml files to use with the install command during the `test` action in order to set required values                            |
 | `version`             | string | Can be used to override the package version; defauls to `$ESTAFETTE_BUILD_VERSION`                                                                  |
