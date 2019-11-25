@@ -182,7 +182,7 @@ func TestSetDefaults(t *testing.T) {
 		assert.Equal(t, "kind", params.KindHost)
 	})
 
-	t.Run("SetsTimeoutTo120IfEmpty", func(t *testing.T) {
+	t.Run("SetsTimeoutTo120sIfEmpty", func(t *testing.T) {
 
 		gitName := "git-name"
 		appLabel := "app-label"
@@ -190,13 +190,13 @@ func TestSetDefaults(t *testing.T) {
 		releaseTargetName := ""
 
 		params := params{
-			Timeout: nil,
+			Timeout: "",
 		}
 
 		// act
 		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName)
 
-		assert.Equal(t, 120, *params.Timeout)
+		assert.Equal(t, "120s", params.Timeout)
 	})
 
 	t.Run("KeepsTimeoutIfSet", func(t *testing.T) {
@@ -206,15 +206,14 @@ func TestSetDefaults(t *testing.T) {
 		buildVersion := "1.0.0"
 		releaseTargetName := ""
 
-		timeout := 60
 		params := params{
-			Timeout: &timeout,
+			Timeout: "60s",
 		}
 
 		// act
 		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName)
 
-		assert.Equal(t, 60, *params.Timeout)
+		assert.Equal(t, "60s", params.Timeout)
 	})
 
 	t.Run("SetsHelmSubdirectoryToHelmIfEmpty", func(t *testing.T) {

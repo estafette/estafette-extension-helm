@@ -2,8 +2,6 @@ package main
 
 import "fmt"
 
-var defaultTimeout = 120
-
 type params struct {
 	Action                       string `json:"action,omitempty" yaml:"action,omitempty"`
 	AppVersion                   string `json:"appVersion,omitempty" yaml:"appVersion,omitempty"`
@@ -16,7 +14,7 @@ type params struct {
 	RepositoryDirectory          string `json:"repoDir,omitempty" yaml:"repoDir,omitempty"`
 	RepositoryChartsSubdirectory string `json:"repoChartsSubdir,omitempty" yaml:"repoChartsSubdir,omitempty"`
 	RepositoryURL                string `json:"repoUrl,omitempty" yaml:"repoUrl,omitempty"`
-	Timeout                      *int   `json:"timeout,omitempty" yaml:"timeout,omitempty"`
+	Timeout                      string `json:"timeout,omitempty" yaml:"timeout,omitempty"`
 	Values                       string `json:"values,omitempty" yaml:"values,omitempty"`
 	Version                      string `json:"version,omitempty" yaml:"version,omitempty"`
 }
@@ -44,8 +42,8 @@ func (p *params) SetDefaults(gitName string, appLabel string, buildVersion strin
 		p.KindHost = "kubernetes"
 	}
 
-	if p.Timeout == nil {
-		p.Timeout = &defaultTimeout
+	if p.Timeout == "" {
+		p.Timeout = "120s"
 	}
 
 	if p.HelmSubdirectory == "" {
