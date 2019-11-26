@@ -122,7 +122,7 @@ func main() {
 		foundation.RunCommand("helm diff upgrade %v %v %v --allow-unreleased", params.Chart, filename, overrideValuesFilesParameter)
 
 		log.Printf("\nInstalling chart file %v and waiting for %v for it to be ready...\n", filename, params.Timeout)
-		err = foundation.RunCommandExtended("helm upgrade --install %v %v %v --wait --timeout %v", params.Chart, filename, overrideValuesFilesParameter, params.Timeout)
+		err = foundation.RunCommandExtended("helm upgrade --install %v %v %v --history-max 1 --cleanup-on-fail --atomic --timeout %v", params.Chart, filename, overrideValuesFilesParameter, params.Timeout)
 
 		if err != nil {
 			log.Printf("Installation failed, showing logs...")
@@ -273,7 +273,7 @@ func main() {
 
 		if params.Action == "install" {
 			log.Printf("\nInstalling chart and waiting for %v for it to be ready...\n", params.Timeout)
-			err = foundation.RunCommandExtended("helm upgrade --install %v %v %v --namespace %v --wait --timeout %v", params.ReleaseName, filename, overrideValuesFilesParameter, params.Namespace, params.Timeout)
+			err = foundation.RunCommandExtended("helm upgrade --install %v %v %v --namespace %v --history-max 1 --cleanup-on-fail --atomic --timeout %v", params.ReleaseName, filename, overrideValuesFilesParameter, params.Namespace, params.Timeout)
 			if err != nil {
 				log.Printf("Installation failed, showing logs...")
 				foundation.RunCommand("kubectl get all -n %v", params.Namespace)
