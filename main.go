@@ -276,7 +276,11 @@ func main() {
 
 		if params.Action == "install" {
 			log.Printf("\nInstalling chart and waiting for %v for it to be ready...\n", params.Timeout)
-			err = foundation.RunCommandExtended(ctx, "helm upgrade --install %v %v %v --namespace %v --history-max 1 --cleanup-on-fail --atomic --timeout %v", params.ReleaseName, filename, overrideValuesFilesParameter, params.Namespace, params.Timeout)
+			forceArgument := ""
+			if params.Force {
+				forceArgument = "--force"
+			}
+			err = foundation.RunCommandExtended(ctx, "helm upgrade --install %v %v %v --namespace %v --history-max 1 --cleanup-on-fail --atomic --timeout %v %v", params.ReleaseName, filename, overrideValuesFilesParameter, params.Namespace, params.Timeout, forceArgument)
 			if err != nil {
 				log.Printf("Installation failed, showing logs...")
 				foundation.RunCommand(ctx, "kubectl get all -n %v", params.Namespace)

@@ -7,6 +7,7 @@ type params struct {
 	AppVersion                   string `json:"appVersion,omitempty" yaml:"appVersion,omitempty"`
 	Chart                        string `json:"chart,omitempty" yaml:"chart,omitempty"`
 	Credentials                  string `json:"credentials,omitempty" yaml:"credentials,omitempty"`
+	Force                        bool   `json:"force,omitempty" yaml:"force,omitempty"`
 	HelmSubdirectory             string `json:"helmSubdir,omitempty" yaml:"helmSubdir,omitempty"`
 	KindHost                     string `json:"kindHost,omitempty" yaml:"kindHost,omitempty"`
 	Namespace                    string `json:"namespace,omitempty" yaml:"namespace,omitempty"`
