@@ -231,7 +231,11 @@ func main() {
 			}
 
 			log.Info().Msg("Showing logs for container...")
-			foundation.RunCommand(ctx, "kubectl logs -l app.kubernetes.io/instance=%v -n %v --all-containers=true", params.ReleaseName, params.Namespace)
+			if params.FollowLogs {
+				foundation.RunCommand(ctx, "kubectl logs -l app.kubernetes.io/instance=%v -n %v --all-containers=true --pod-running-timeout=60s --follow=true", params.ReleaseName, params.Namespace)
+			} else {
+				foundation.RunCommand(ctx, "kubectl logs -l app.kubernetes.io/instance=%v -n %v --all-containers=true --pod-running-timeout=60s", params.ReleaseName, params.Namespace)
+			}
 		}
 
 	case "uninstall":

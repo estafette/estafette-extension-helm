@@ -10,6 +10,7 @@ This extension helps with linting, packaging, testing and adding Helm charts to 
 | `appVersion`          | string | Can be used to override the app version; defaults to `$ESTAFETTE_BUILD_VERSION`                                                                     |
 | `chart`               | string | The name of the chart and subdirectory where the chart is stored; defaults to `$ESTAFETTE_LABEL_APP` or `$ESTAFETTE_GIT_NAME` in that order         |
 | `credentials`         | string | To set a specific set of type `kubernetes-engine` credentials when using action `install`; defaults to the release target name prefixed with `gke-` |
+| `followLogs`          | bool   | Indicate whether to follow logs after installing a chart; use it for jobs, but not for deployments since pods will continue to run                  |
 | `force`               | bool   | Allow a force installation for action `install`                                                                                                     |
 | `helmSubdir`          | string | The subdirectory in this repository where helm charts are stores; defaults to `helm`                                                                |
 | `kindHost`            | string | The service container name running the [bsycorp/kind](https://hub.docker.com/r/bsycorp/kind) container to run tests against                         |
