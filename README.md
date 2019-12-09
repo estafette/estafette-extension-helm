@@ -160,6 +160,20 @@ releases:
         namespace: mynamespace
 ```
 
+### Uninstall
+
+Similar to installing a chart to a GKE cluster it can also be uninstalled from thet cluster with the snippet below.
+
+```yaml
+releases:
+  development:
+    stages:
+      install:
+        image: extensions/helm:stable
+        action: uninstall
+        namespace: mynamespace
+```
+
 ### Diff
 
 The _diff_ action does everything the _install_ action does except for actually applying the changes, with the following snippet.
