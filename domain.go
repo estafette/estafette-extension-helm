@@ -2,9 +2,6 @@ package main
 
 import "fmt"
 
-var defaultTimeout = 120
-var defaultTillerless = true
-
 type params struct {
 	Action                       string `json:"action,omitempty" yaml:"action,omitempty"`
 	AppVersion                   string `json:"appVersion,omitempty" yaml:"appVersion,omitempty"`
@@ -17,9 +14,7 @@ type params struct {
 	RepositoryDirectory          string `json:"repoDir,omitempty" yaml:"repoDir,omitempty"`
 	RepositoryChartsSubdirectory string `json:"repoChartsSubdir,omitempty" yaml:"repoChartsSubdir,omitempty"`
 	RepositoryURL                string `json:"repoUrl,omitempty" yaml:"repoUrl,omitempty"`
-	Tillerless                   *bool  `json:"tillerless,omitempty" yaml:"tillerless,omitempty"`
-	TillerlessNamespace          string `json:"tillerlessNamespace,omitempty" yaml:"tillerlessNamespace,omitempty"`
-	Timeout                      *int   `json:"timeout,omitempty" yaml:"timeout,omitempty"`
+	Timeout                      string `json:"timeout,omitempty" yaml:"timeout,omitempty"`
 	Values                       string `json:"values,omitempty" yaml:"values,omitempty"`
 	Version                      string `json:"version,omitempty" yaml:"version,omitempty"`
 }
@@ -47,8 +42,8 @@ func (p *params) SetDefaults(gitName string, appLabel string, buildVersion strin
 		p.KindHost = "kubernetes"
 	}
 
-	if p.Timeout == nil {
-		p.Timeout = &defaultTimeout
+	if p.Timeout == "" {
+		p.Timeout = "120s"
 	}
 
 	if p.HelmSubdirectory == "" {
@@ -69,14 +64,6 @@ func (p *params) SetDefaults(gitName string, appLabel string, buildVersion strin
 
 	if p.ReleaseName == "" {
 		p.ReleaseName = p.Chart
-	}
-
-	if p.Tillerless == nil {
-		p.Tillerless = &defaultTillerless
-	}
-
-	if p.TillerlessNamespace == "" {
-		p.TillerlessNamespace = "helm-extension-releases"
 	}
 
 	// default credentials to release name prefixed with gke if no override in stage params
