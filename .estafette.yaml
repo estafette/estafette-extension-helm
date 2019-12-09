@@ -45,7 +45,6 @@ stages:
           && chmod +x /usr/local/bin/kubectl \
           && mkdir -p ~/.kube ~/.helm/plugins \
           && helm plugin install https://github.com/databus23/helm-diff --version ${HELM_DIFF_VERSION} \
-          && helm plugin install https://github.com/helm/helm-2to3 --version ${HELM_2_TO_3_VERSION} \
           && helm plugin list
 
       # install gcloud sdk, see https://github.com/GoogleCloudPlatform/cloud-sdk-docker/blob/master/alpine/Dockerfile
