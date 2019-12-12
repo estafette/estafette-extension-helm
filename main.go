@@ -130,12 +130,12 @@ func main() {
 		if err != nil {
 			log.Printf("Installation failed, showing logs...")
 			foundation.RunCommand(ctx, "kubectl get all")
-			foundation.RunCommand(ctx, "kubectl logs -l app.kubernetes.io/instance=%v --all-containers=true", params.Chart)
+			_ = foundation.RunCommandExtended(ctx, "kubectl logs -l app.kubernetes.io/instance=%v --all-containers=true", params.Chart)
 			os.Exit(1)
 		}
 
 		log.Info().Msg("Showing logs for container...")
-		foundation.RunCommand(ctx, "kubectl logs -l app.kubernetes.io/instance=%v --all-containers=true", params.Chart)
+		_ = foundation.RunCommandExtended(ctx, "kubectl logs -l app.kubernetes.io/instance=%v --all-containers=true", params.Chart)
 
 	case "publish":
 		log.Info().Msgf("Publishing chart %v with app version %v and version %v...", params.Chart, params.AppVersion, params.Version)
@@ -226,15 +226,15 @@ func main() {
 			if err != nil {
 				log.Printf("Installation failed, showing logs...")
 				foundation.RunCommand(ctx, "kubectl get all -n %v", params.Namespace)
-				foundation.RunCommand(ctx, "kubectl logs -l app.kubernetes.io/instance=%v -n %v --all-containers=true", params.ReleaseName, params.Namespace)
+				_ = foundation.RunCommandExtended(ctx, "kubectl logs -l app.kubernetes.io/instance=%v -n %v --all-containers=true", params.ReleaseName, params.Namespace)
 				os.Exit(1)
 			}
 
 			log.Info().Msg("Showing logs for container...")
 			if params.FollowLogs {
-				foundation.RunCommand(ctx, "kubectl logs -l app.kubernetes.io/instance=%v -n %v --all-containers=true --pod-running-timeout=60s --follow=true", params.ReleaseName, params.Namespace)
+				_ = foundation.RunCommandExtended(ctx, "kubectl logs -l app.kubernetes.io/instance=%v -n %v --all-containers=true --pod-running-timeout=60s --follow=true", params.ReleaseName, params.Namespace)
 			} else {
-				foundation.RunCommand(ctx, "kubectl logs -l app.kubernetes.io/instance=%v -n %v --all-containers=true --pod-running-timeout=60s", params.ReleaseName, params.Namespace)
+				_ = foundation.RunCommandExtended(ctx, "kubectl logs -l app.kubernetes.io/instance=%v -n %v --all-containers=true --pod-running-timeout=60s", params.ReleaseName, params.Namespace)
 			}
 		}
 
