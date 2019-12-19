@@ -29,7 +29,7 @@ stages:
     dontExpand:
     - PATH
     inline: |
-      FROM alpine/helm:3.0.1
+      FROM alpine/helm:3.0.2
 
       LABEL maintainer="estafette.io" \
             description="The ${ESTAFETTE_GIT_NAME} component is an Estafette extension to with linting, packaging, testing and adding Helm charts to repositories"
@@ -77,6 +77,22 @@ stages:
     repositories:
     - extensions
     path: ./publish
+
+  check-container:
+    parallelStages:
+      check-efficiency:
+        image: extensions/docker:dev
+        action: dive
+        container: helm
+        repositories:
+        - extensions
+
+      vulnerability-scan:
+        image: extensions/docker:dev
+        action: trivy
+        container: helm
+        repositories:
+        - extensions
 
   push-to-docker-hub:
     image: extensions/docker:dev
