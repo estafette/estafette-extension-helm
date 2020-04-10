@@ -285,16 +285,9 @@ func initCredential(ctx context.Context, params params) *GKECredentials {
 		log.Fatal().Err(err).Msg("Failed writing service account keyfile")
 	}
 
-	return credential
-}
-
-func initKubectl(ctx context.Context, params params) {
-
-	credential := initCredential(ctx, params)
-
 	log.Info().Msg("Retrieving service account email from credentials...")
 	var keyFileMap map[string]interface{}
-	err := json.Unmarshal([]byte(credential.AdditionalProperties.ServiceAccountKeyfile), &keyFileMap)
+	err = json.Unmarshal([]byte(credential.AdditionalProperties.ServiceAccountKeyfile), &keyFileMap)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed unmarshalling service account keyfile")
 	}
@@ -315,6 +308,14 @@ func initKubectl(ctx context.Context, params params) {
 
 	log.Info().Msgf("Setting gcloud account to %v", saClientEmail)
 	foundation.RunCommandWithArgs(ctx, "gcloud", []string{"config", "set", "account", saClientEmail})
+
+	return credential
+}
+
+func initKubectl(ctx context.Context, params params) {
+
+	credential := initCredential(ctx, params)
+
 	log.Info().Msg("Setting gcloud project")
 	foundation.RunCommandWithArgs(ctx, "gcloud", []string{"config", "set", "project", credential.AdditionalProperties.Project})
 
