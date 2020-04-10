@@ -145,7 +145,7 @@ func main() {
 			// publish to gcs bucket
 			initGcloud(ctx, params)
 
-			foundation.RunCommand(ctx, "helm gcs push --service-account=/key-file.json --retry --debug %v gs://%v", filename, params.Bucket)
+			foundation.RunCommand(ctx, "helm gcs push %v gs://%v --service-account='/key-file.json' --retry --debug", filename, params.Bucket)
 
 		} else {
 			// publish to git repo
@@ -260,7 +260,7 @@ func main() {
 	}
 }
 
-func initGcloud(ctx context.Context, params params) *GKECredentials {
+func initCredential(ctx context.Context, params params) *GKECredentials {
 	if *credentialsJSON == "" {
 		log.Fatal().Msg("Credentials of type kubernetes-engine are not injected; configure this extension as trusted and inject credentials of type kubernetes-engine")
 	}
@@ -289,7 +289,7 @@ func initGcloud(ctx context.Context, params params) *GKECredentials {
 
 func initKubectl(ctx context.Context, params params) {
 
-	credential := initGcloud(ctx, params)
+	credential := initCredential(ctx, params)
 
 	log.Info().Msg("Retrieving service account email from credentials...")
 	var keyFileMap map[string]interface{}
