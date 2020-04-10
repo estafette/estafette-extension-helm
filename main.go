@@ -141,23 +141,33 @@ func main() {
 		log.Info().Msgf("Publishing chart %v with app version %v and version %v...", params.Chart, params.AppVersion, params.Version)
 
 		filename := fmt.Sprintf("%v-%v.tgz", params.Chart, params.Version)
-		foundation.RunCommand(ctx, "mkdir -p %v/%v", params.RepositoryDirectory, params.RepositoryChartsSubdirectory)
-		foundation.RunCommand(ctx, "cp %v %v/%v", filename, params.RepositoryDirectory, params.RepositoryChartsSubdirectory)
-		err = os.Chdir(params.RepositoryDirectory)
-		if err != nil {
-			log.Fatal().Err(err).Msgf("Failed changing directory to %v", params.RepositoryDirectory)
+		if params.Bucket != "" {
+			// publish to gcs bucket
+			initGcloud(ctx, params)
+
+			foundation.RunCommand(ctx, "helm repo add gcs-repo gs://%v", params.Bucket)
+			foundation.RunCommand(ctx, "helm gcs push %v gs://%v", filename, params.Bucket)
+		} else {
+			// publish to git repo
+
+			foundation.RunCommand(ctx, "mkdir -p %v/%v", params.RepositoryDirectory, params.RepositoryChartsSubdirectory)
+			foundation.RunCommand(ctx, "cp %v %v/%v", filename, params.RepositoryDirectory, params.RepositoryChartsSubdirectory)
+			err = os.Chdir(params.RepositoryDirectory)
+			if err != nil {
+				log.Fatal().Err(err).Msgf("Failed changing directory to %v", params.RepositoryDirectory)
+			}
+
+			log.Info().Msgf("Generating/updating index file for repository %v...", params.RepositoryURL)
+			foundation.RunCommand(ctx, "helm repo index --url %v .", params.RepositoryURL)
+
+			log.Info().Msg("Pushing changes to repository...")
+			foundation.RunCommandWithArgs(ctx, "git", []string{"config", "--global", "user.email", "'bot@estafette.io'"})
+			foundation.RunCommandWithArgs(ctx, "git", []string{"config", "--global", "user.name", "'estafette-bot'"})
+			foundation.RunCommand(ctx, "git status")
+			foundation.RunCommand(ctx, "git add --all")
+			foundation.RunCommandWithArgs(ctx, "git", []string{"commit", "--allow-empty", "-m", fmt.Sprintf("'%v v%v'", params.Chart, params.Version)})
+			foundation.RunCommand(ctx, "git push origin master")
 		}
-
-		log.Info().Msgf("Generating/updating index file for repository %v...", params.RepositoryURL)
-		foundation.RunCommand(ctx, "helm repo index --url %v .", params.RepositoryURL)
-
-		log.Info().Msg("Pushing changes to repository...")
-		foundation.RunCommandWithArgs(ctx, "git", []string{"config", "--global", "user.email", "'bot@estafette.io'"})
-		foundation.RunCommandWithArgs(ctx, "git", []string{"config", "--global", "user.name", "'estafette-bot'"})
-		foundation.RunCommand(ctx, "git status")
-		foundation.RunCommand(ctx, "git add --all")
-		foundation.RunCommandWithArgs(ctx, "git", []string{"commit", "--allow-empty", "-m", fmt.Sprintf("'%v v%v'", params.Chart, params.Version)})
-		foundation.RunCommand(ctx, "git push origin master")
 
 	case "purge":
 		log.Info().Msgf("Purging pre-release version for chart %v with versions '%v-.+'...", params.Chart, params.Version)
@@ -250,7 +260,7 @@ func main() {
 	}
 }
 
-func initKubectl(ctx context.Context, params params) {
+func initGcloud(ctx context.Context, params params) *GKECredentials {
 	if *credentialsJSON == "" {
 		log.Fatal().Msg("Credentials of type kubernetes-engine are not injected; configure this extension as trusted and inject credentials of type kubernetes-engine")
 	}
@@ -285,7 +295,7 @@ func initKubectl(ctx context.Context, params params) {
 		}
 	}
 
-	log.Info().Msgf("Storing gke credential %v on disk...", params.Credentials)
+	log.Info().Msgf("Storing gcp credential %v on disk...", params.Credentials)
 	err = ioutil.WriteFile("/key-file.json", []byte(credential.AdditionalProperties.ServiceAccountKeyfile), 0600)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed writing service account keyfile")
@@ -296,6 +306,13 @@ func initKubectl(ctx context.Context, params params) {
 
 	log.Info().Msgf("Setting gcloud account to %v", saClientEmail)
 	foundation.RunCommandWithArgs(ctx, "gcloud", []string{"config", "set", "account", saClientEmail})
+
+	return credential
+}
+
+func initKubectl(ctx context.Context, params params) {
+
+	credential := initGcloud(ctx, params)
 
 	log.Info().Msg("Setting gcloud project")
 	foundation.RunCommandWithArgs(ctx, "gcloud", []string{"config", "set", "project", credential.AdditionalProperties.Project})
@@ -310,5 +327,4 @@ func initKubectl(ctx context.Context, params params) {
 		log.Fatal().Msg("Credentials have no zone or region; at least one of them has to be defined")
 	}
 	foundation.RunCommandWithArgs(ctx, "gcloud", clustersGetCredentialsArsgs)
-
 }

@@ -16,6 +16,7 @@ type params struct {
 	RepositoryDirectory          string `json:"repoDir,omitempty" yaml:"repoDir,omitempty"`
 	RepositoryChartsSubdirectory string `json:"repoChartsSubdir,omitempty" yaml:"repoChartsSubdir,omitempty"`
 	RepositoryURL                string `json:"repoUrl,omitempty" yaml:"repoUrl,omitempty"`
+	Bucket                       string `json:"bucket,omitempty" yaml:"bucket,omitempty"`
 	Timeout                      string `json:"timeout,omitempty" yaml:"timeout,omitempty"`
 	Values                       string `json:"values,omitempty" yaml:"values,omitempty"`
 	Version                      string `json:"version,omitempty" yaml:"version,omitempty"`

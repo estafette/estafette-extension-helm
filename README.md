@@ -84,6 +84,15 @@ In order to publish to a git repository you first need to clone that git reposit
     repoUrl: https://helm.estafette.io/
 ```
 
+To publish to a cloud storage bucket instead use the following snippet:
+
+```yaml
+ publish-helm-chart:
+    image: extensions/helm:stable
+    action: publish
+    bucket: my-gcs-bucket
+```
+
 ### Release version
 
 If you run the package and publish steps as shown above it will take the version coming from Estafette CI. If you're on a release branch it will drop the label from the version number, automatically leading to a release package.

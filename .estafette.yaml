@@ -35,7 +35,8 @@ stages:
             description="The ${ESTAFETTE_GIT_NAME} component is an Estafette extension to with linting, packaging, testing and adding Helm charts to repositories"
 
       ENV VERSION="${ESTAFETTE_BUILD_VERSION}" \
-          HELM_DIFF_VERSION=v3.0.0-rc.7
+          HELM_DIFF_VERSION="v3.1.1" \
+          HELM_GCS_VERSION="0.3.1"
 
       RUN apk add --update --upgrade  --no-cache \
             git \
@@ -46,6 +47,7 @@ stages:
           && chmod +x /usr/local/bin/kubectl \
           && mkdir -p ~/.kube ~/.helm/plugins \
           && helm plugin install https://github.com/databus23/helm-diff --version ${HELM_DIFF_VERSION} \
+          && helm plugin install https://github.com/hayorov/helm-gcs --version ${HELM_GCS_VERSION} \
           && helm plugin list
 
       # install gcloud sdk, see https://github.com/GoogleCloudPlatform/cloud-sdk-docker/blob/master/alpine/Dockerfile
