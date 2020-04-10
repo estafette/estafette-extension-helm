@@ -278,12 +278,26 @@ func initGcloud(ctx context.Context, params params) *GKECredentials {
 		log.Fatal().Msgf("Credential with name %v does not exist.", params.Credentials)
 	}
 
+	log.Info().Msgf("Storing gcp credential %v on disk...", params.Credentials)
+	err = ioutil.WriteFile("/key-file.json", []byte(credential.AdditionalProperties.ServiceAccountKeyfile), 0600)
+	if err != nil {
+		log.Fatal().Err(err).Msg("Failed writing service account keyfile")
+	}
+
+	return credential
+}
+
+func initKubectl(ctx context.Context, params params) {
+
+	credential := initGcloud(ctx, params)
+
 	log.Info().Msg("Retrieving service account email from credentials...")
 	var keyFileMap map[string]interface{}
-	err = json.Unmarshal([]byte(credential.AdditionalProperties.ServiceAccountKeyfile), &keyFileMap)
+	err := json.Unmarshal([]byte(credential.AdditionalProperties.ServiceAccountKeyfile), &keyFileMap)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed unmarshalling service account keyfile")
 	}
+
 	var saClientEmail string
 	if saClientEmailIntfc, ok := keyFileMap["client_email"]; !ok {
 		log.Fatal().Msg("Field client_email missing from service account keyfile")
@@ -295,25 +309,11 @@ func initGcloud(ctx context.Context, params params) *GKECredentials {
 		}
 	}
 
-	log.Info().Msgf("Storing gcp credential %v on disk...", params.Credentials)
-	err = ioutil.WriteFile("/key-file.json", []byte(credential.AdditionalProperties.ServiceAccountKeyfile), 0600)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed writing service account keyfile")
-	}
-
 	log.Info().Msg("Authenticating to google cloud")
 	foundation.RunCommandWithArgs(ctx, "gcloud", []string{"auth", "activate-service-account", saClientEmail, "--key-file", "/key-file.json"})
 
 	log.Info().Msgf("Setting gcloud account to %v", saClientEmail)
 	foundation.RunCommandWithArgs(ctx, "gcloud", []string{"config", "set", "account", saClientEmail})
-
-	return credential
-}
-
-func initKubectl(ctx context.Context, params params) {
-
-	credential := initGcloud(ctx, params)
-
 	log.Info().Msg("Setting gcloud project")
 	foundation.RunCommandWithArgs(ctx, "gcloud", []string{"config", "set", "project", credential.AdditionalProperties.Project})
 
