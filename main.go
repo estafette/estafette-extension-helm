@@ -146,7 +146,7 @@ func main() {
 			initCredential(ctx, params)
 
 			foundation.RunCommand(ctx, "helm repo add gcs-repo gs://%v", params.Bucket)
-			foundation.RunCommand(ctx, "helm gcs push %v gcs-repo --retry", filename)
+			foundation.RunCommand(ctx, "helm gcs push %v gcs-repo --service-account=/key-file.json --retry", filename)
 
 		} else {
 			// publish to git repo
