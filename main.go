@@ -145,7 +145,7 @@ func main() {
 			// publish to gcs bucket
 			initGcloud(ctx, params)
 
-			foundation.RunCommand(ctx, "helm gcs push --service-account=/key-file.json %v gs://%v", filename, params.Bucket)
+			foundation.RunCommand(ctx, "helm gcs push --service-account=/key-file.json --retry %v gs://%v", filename, params.Bucket)
 
 		} else {
 			// publish to git repo
