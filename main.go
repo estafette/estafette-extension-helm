@@ -143,7 +143,7 @@ func main() {
 		filename := fmt.Sprintf("%v-%v.tgz", params.Chart, params.Version)
 		if params.Bucket != "" {
 			// publish to gcs bucket
-			initGcloud(ctx, params)
+			initCredential(ctx, params)
 
 			foundation.RunCommand(ctx, "helm gcs push %v gs://%v --service-account='/key-file.json' --retry --debug", filename, params.Bucket)
 
