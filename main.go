@@ -121,6 +121,11 @@ func main() {
 		}
 
 		filename := fmt.Sprintf("%v-%v.tgz", params.Chart, params.Version)
+		if !foundation.FileExists(filename) {
+			log.Info().Msgf("No helm package present, retrieving helm chart %v version %v from %v...", params.Chart, params.Version, params.RepositoryURL)
+			foundation.RunCommand(ctx, "helm fetch %v --version %v --repo %v", params.Chart, params.Version, params.RepositoryURL)
+		}
+
 		log.Info().Msg("Showing template to be installed...")
 		foundation.RunCommand(ctx, "helm diff upgrade %v %v %v --allow-unreleased", params.Chart, filename, overrideValuesFilesParameter)
 
