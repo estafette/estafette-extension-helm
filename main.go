@@ -67,6 +67,8 @@ func main() {
 		foundation.RunCommand(ctx, "helm lint %v", filepath.Join(params.HelmSubdirectory, params.Chart))
 
 	case "package":
+		addRequirementRepositories(ctx, params)
+
 		log.Info().Msgf("Packaging chart %v with app version %v and version %v...", params.Chart, params.AppVersion, params.Version)
 		foundation.RunCommand(ctx, "helm package --app-version %v --version %v %v", params.AppVersion, params.Version, filepath.Join(params.HelmSubdirectory, params.Chart))
 
@@ -334,4 +336,25 @@ func initKubectl(ctx context.Context, params params) {
 		log.Fatal().Msg("Credentials have no zone or region; at least one of them has to be defined")
 	}
 	foundation.RunCommandWithArgs(ctx, "gcloud", clustersGetCredentialsArsgs)
+}
+
+func addRequirementRepositories(ctx context.Context, params params) {
+	requirementsPath := filepath.Join(params.HelmSubdirectory, params.Chart, "requirements.yaml")
+	if _, err := os.Stat(requirementsPath); err == nil {
+
+		data, err := ioutil.ReadFile(requirementsPath)
+		if err != nil {
+			log.Fatal().Err(err).Msgf("Failed reading requirements file at %v", requirementsPath)
+		}
+
+		var requirements requirements
+		if err := yaml.Unmarshal(data, &requirements); err != nil {
+			log.Fatal().Err(err).Msgf("Failed unmarshalling requirements file at %v", requirementsPath)
+		}
+
+		for _, dependency := range requirements.Dependencies {
+			log.Info().Msgf("Adding required repository %v from requirements.yaml file at %v...", dependency.Repository, requirementsPath)
+			foundation.RunCommand(ctx, "helm repo add %v %v", dependency.Name, dependency.Repository)
+		}
+	}
 }

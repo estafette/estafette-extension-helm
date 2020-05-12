@@ -74,3 +74,14 @@ func (p *params) SetDefaults(gitName string, appLabel string, buildVersion strin
 		p.Credentials = fmt.Sprintf("gke-%v", releaseTargetName)
 	}
 }
+
+type requirements struct {
+	Dependencies []dependency `json:"dependencies,omitempty" yaml:"dependencies,omitempty"`
+}
+
+type dependency struct {
+	Name       string `json:"name,omitempty" yaml:"name,omitempty"`
+	Version    string `json:"version,omitempty" yaml:"version,omitempty"`
+	Repository string `json:"repository,omitempty" yaml:"repository,omitempty"`
+	Alias      string `json:"alias,omitempty" yaml:"alias,omitempty"`
+}
