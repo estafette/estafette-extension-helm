@@ -11,6 +11,7 @@ type params struct {
 	Force                        bool   `json:"force,omitempty" yaml:"force,omitempty"`
 	HelmSubdirectory             string `json:"helmSubdir,omitempty" yaml:"helmSubdir,omitempty"`
 	KindHost                     string `json:"kindHost,omitempty" yaml:"kindHost,omitempty"`
+	LabelSelectorOverride        string `json:"labelSelector,omitempty" yaml:"labelSelector,omitempty"`
 	Namespace                    string `json:"namespace,omitempty" yaml:"namespace,omitempty"`
 	ReleaseName                  string `json:"release,omitempty" yaml:"release,omitempty"`
 	RepositoryDirectory          string `json:"repoDir,omitempty" yaml:"repoDir,omitempty"`
