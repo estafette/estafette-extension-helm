@@ -143,11 +143,17 @@ func main() {
 			log.Printf("Installation failed, showing logs...")
 			foundation.RunCommand(ctx, "kubectl get all")
 			_ = foundation.RunCommandExtended(ctx, "kubectl logs -l %v --all-containers=true", labelSelector)
+
+			log.Info().Msg("Showing all resources...")
+			_ = foundation.RunCommandExtended(ctx, "kubectl get all")
 			os.Exit(1)
 		}
 
 		log.Info().Msg("Showing logs for container...")
 		_ = foundation.RunCommandExtended(ctx, "kubectl logs -l %v --all-containers=true", labelSelector)
+
+		log.Info().Msg("Showing all resources...")
+		_ = foundation.RunCommandExtended(ctx, "kubectl get all")
 
 	case "publish":
 		log.Info().Msgf("Publishing chart %v with app version %v and version %v...", params.Chart, params.AppVersion, params.Version)
