@@ -70,7 +70,7 @@ func main() {
 		addRequirementRepositories(ctx, params)
 
 		log.Info().Msgf("Packaging chart %v with app version %v and version %v...", params.Chart, params.AppVersion, params.Version)
-		foundation.RunCommand(ctx, "helm package --app-version %v --version %v %v", params.AppVersion, params.Version, filepath.Join(params.HelmSubdirectory, params.Chart))
+		foundation.RunCommand(ctx, "helm package --app-version %v --version %v --dependency-update %v", params.AppVersion, params.Version, filepath.Join(params.HelmSubdirectory, params.Chart))
 
 	case "test":
 		log.Info().Msgf("Testing chart %v with app version %v and version %v on kind host %v...", params.Chart, params.AppVersion, params.Version, params.KindHost)
