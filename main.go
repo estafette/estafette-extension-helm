@@ -150,9 +150,9 @@ func main() {
 			// publish to gcs bucket
 			initCredential(ctx, params)
 
-			foundation.RunCommand(ctx, "helm gcs init gs://%v --service-account=/key-file.json", params.Bucket)
-			// foundation.RunCommand(ctx, "helm repo add gcs-repo gs://%v", params.Bucket)
-			foundation.RunCommand(ctx, "helm gcs push %v gs://%v --service-account=/key-file.json --retry", filename, params.Bucket)
+			os.Setenv("GOOGLE_APPLICATION_CREDENTIALS", "/key-file.json")
+			foundation.RunCommand(ctx, "helm repo add gcs-repo gs://%v", params.Bucket)
+			foundation.RunCommand(ctx, "helm gcs push %v gcs-repo --retry", filename)
 
 		} else {
 			// publish to git repo
