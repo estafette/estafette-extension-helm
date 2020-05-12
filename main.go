@@ -150,13 +150,12 @@ func main() {
 			// publish to gcs bucket
 			initCredential(ctx, params)
 
-			foundation.RunCommand(ctx, "helm gcs init gs://%v --service-account=/key-file.json", params.Bucket)
-			foundation.RunCommand(ctx, "helm repo add gcs-repo gs://%v --service-account=/key-file.json", params.Bucket)
-			foundation.RunCommand(ctx, "helm gcs push %v gcs-repo --service-account=/key-file.json --retry", filename)
+			// foundation.RunCommand(ctx, "helm gcs init gs://%v --service-account=/key-file.json", params.Bucket)
+			// foundation.RunCommand(ctx, "helm repo add gcs-repo gs://%v", params.Bucket)
+			foundation.RunCommand(ctx, "helm gcs push %v gs://%v --service-account=/key-file.json --retry", filename, params.Bucket)
 
 		} else {
 			// publish to git repo
-
 			foundation.RunCommand(ctx, "mkdir -p %v/%v", params.RepositoryDirectory, params.RepositoryChartsSubdirectory)
 			foundation.RunCommand(ctx, "cp %v %v/%v", filename, params.RepositoryDirectory, params.RepositoryChartsSubdirectory)
 			err = os.Chdir(params.RepositoryDirectory)
