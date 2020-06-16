@@ -57,7 +57,7 @@ stages:
           CLOUD_SDK_VERSION="270.0.0"
 
       RUN apk --no-cache add \
-              python \
+              python3 \
               py-crcmod \
               bash \
               libc6-compat \
