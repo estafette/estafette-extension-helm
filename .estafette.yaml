@@ -29,13 +29,13 @@ stages:
     dontExpand:
     - PATH
     inline: |
-      FROM alpine/helm:3.3.0
+      FROM alpine/helm:3.3.1
 
       LABEL maintainer="estafette.io" \
             description="The ${ESTAFETTE_GIT_NAME} component is an Estafette extension to with linting, packaging, testing and adding Helm charts to repositories"
 
       ENV VERSION="${ESTAFETTE_BUILD_VERSION}" \
-          HELM_DIFF_VERSION="v3.1.2" \
+          HELM_DIFF_VERSION="v3.1.3" \
           HELM_GCS_VERSION="0.3.6"
 
       RUN apk add --update --upgrade  --no-cache \
