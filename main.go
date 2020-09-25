@@ -185,7 +185,7 @@ func main() {
 			foundation.RunCommand(ctx, "git status")
 			foundation.RunCommand(ctx, "git add --all")
 			foundation.RunCommandWithArgs(ctx, "git", []string{"commit", "--allow-empty", "-m", fmt.Sprintf("'%v v%v'", params.Chart, params.Version)})
-			foundation.RunCommand(ctx, "git push origin master")
+			foundation.RunCommand(ctx, "git push origin %v", params.RepositoryBranch)
 		}
 
 	case "purge":
@@ -214,7 +214,7 @@ func main() {
 			foundation.RunCommandWithArgs(ctx, "git", []string{"config", "--global", "user.name", "'estafette-bot'"})
 			foundation.RunCommand(ctx, "git add --all")
 			foundation.RunCommandWithArgs(ctx, "git", []string{"commit", "--allow-empty", "-m", fmt.Sprintf("'purged %v v%v-.+'", params.Chart, params.Version)})
-			foundation.RunCommand(ctx, "git push origin master")
+			foundation.RunCommand(ctx, "git push origin %v", params.RepositoryBranch)
 
 		} else {
 			log.Info().Msg("Found 0 files to purge")

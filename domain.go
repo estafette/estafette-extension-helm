@@ -17,6 +17,7 @@ type params struct {
 	RepositoryDirectory          string `json:"repoDir,omitempty" yaml:"repoDir,omitempty"`
 	RepositoryChartsSubdirectory string `json:"repoChartsSubdir,omitempty" yaml:"repoChartsSubdir,omitempty"`
 	RepositoryURL                string `json:"repoUrl,omitempty" yaml:"repoUrl,omitempty"`
+	RepositoryBranch             string `json:"repoBranch,omitempty" yaml:"repoBranch,omitempty"`
 	Bucket                       string `json:"bucket,omitempty" yaml:"bucket,omitempty"`
 	Timeout                      string `json:"timeout,omitempty" yaml:"timeout,omitempty"`
 	Values                       string `json:"values,omitempty" yaml:"values,omitempty"`
@@ -64,6 +65,10 @@ func (p *params) SetDefaults(gitName string, appLabel string, buildVersion strin
 
 	if p.RepositoryURL == "" {
 		p.RepositoryURL = "https://helm.estafette.io/"
+	}
+
+	if p.RepositoryBranch == "" {
+		p.RepositoryBranch = "master"
 	}
 
 	if p.ReleaseName == "" {
