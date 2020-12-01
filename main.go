@@ -109,8 +109,6 @@ func main() {
 			log.Fatal().Err(err).Msgf("Failed to retrieve kind config from http://%v:10080/config", params.KindHost)
 		}
 
-		log.Debug().Str("config", string(body)).Msgf("Config from http://%v:10080/config", params.KindHost)
-
 		serverRegex, err := regexp.Compile(`server:\s+(http|https)://([^:]+):(\d+)`)
 		if err != nil {
 			log.Fatal().Err(err).Msgf("Failed isolating server in config from http://%v:10080/config", params.KindHost)
