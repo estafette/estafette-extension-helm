@@ -9,6 +9,7 @@ import (
 	"os"
 	"os/user"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strings"
 	"time"
@@ -110,11 +111,24 @@ func main() {
 
 		log.Debug().Str("config", string(body)).Msgf("Config from http://%v:10080/config", params.KindHost)
 
-		kubeConfig := strings.ReplaceAll(string(body), "localhost", params.KindHost)
+		serverRegex, err := regexp.Compile(`server:\s+(http|https)://([^:]+):(\d+)`)
+		if err != nil {
+			log.Fatal().Err(err).Msgf("Failed isolating server in config from http://%v:10080/config", params.KindHost)
+		}
+
+		serverMatches := serverRegex.FindStringSubmatch(string(body))
+		if len(serverMatches) != 4 {
+			log.Fatal().Interface("serverMatches", serverMatches).Msgf("Failed isolating server in config from http://%v:10080/config", params.KindHost)
+		}
+
+		kubeConfig := string(body)
+
+		kubeConfig = strings.ReplaceAll(kubeConfig, serverMatches[2], params.KindHost)
+		kubeConfig = strings.ReplaceAll(kubeConfig, "localhost", params.KindHost)
 
 		usr, _ := user.Current()
 		homeDir := usr.HomeDir
-		err = ioutil.WriteFile(filepath.Join(homeDir, ".kube/config"), []byte(kubeConfig), 0644)
+		err = ioutil.WriteFile(filepath.Join(homeDir, ".kube/config"), []byte(kubeConfig), 0600)
 		if err != nil {
 			log.Fatal().Err(err).Msg("Failed writing ~/.kube/config")
 		}
