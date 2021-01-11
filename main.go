@@ -37,7 +37,8 @@ var (
 	appLabel          = kingpin.Flag("app-name", "App label, used as application name if not passed explicitly.").Envar("ESTAFETTE_LABEL_APP").String()
 	buildVersion      = kingpin.Flag("build-version", "Version number, used if not passed explicitly.").Envar("ESTAFETTE_BUILD_VERSION").String()
 	releaseTargetName = kingpin.Flag("release-target-name", "Name of the release target, which is used by convention to resolve the credentials.").Envar("ESTAFETTE_RELEASE_NAME").String()
-	credentialsJSON   = kingpin.Flag("credentials", "GKE credentials configured at service level, passed in to this trusted extension.").Envar("ESTAFETTE_CREDENTIALS_KUBERNETES_ENGINE").String()
+
+	credentialsPath = kingpin.Flag("credentials-path", "Path to file with GKE credentials configured at service level, passed in to this trusted extension.").Default("/credentials/kubernetes_engine.json").String()
 )
 
 func main() {
@@ -295,15 +296,26 @@ func main() {
 }
 
 func initCredential(ctx context.Context, params params) *GKECredentials {
-	if *credentialsJSON == "" {
-		log.Fatal().Msg("Credentials of type kubernetes-engine are not injected; configure this extension as trusted and inject credentials of type kubernetes-engine")
-	}
 
 	log.Info().Msg("Unmarshalling injected credentials...")
 	var credentials []GKECredentials
-	err := json.Unmarshal([]byte(*credentialsJSON), &credentials)
-	if err != nil {
-		log.Fatal().Err(err).Msg("Failed unmarshalling injected credentials")
+
+	// use mounted credential file if present instead of relying on an envvar
+	if runtime.GOOS == "windows" {
+		*credentialsPath = "C:" + *credentialsPath
+	}
+	if foundation.FileExists(*credentialsPath) {
+		log.Info().Msgf("Reading credentials from file at path %v...", *credentialsPath)
+		credentialsFileContent, err := ioutil.ReadFile(*credentialsPath)
+		if err != nil {
+			log.Fatal().Msgf("Failed reading credential file at path %v.", *credentialsPath)
+		}
+		err = json.Unmarshal(credentialsFileContent, &credentials)
+		if err != nil {
+			log.Fatal().Err(err).Msg("Failed unmarshalling injected credentials")
+		}
+	} else {
+		log.Fatal().Msg("Credentials of type kubernetes-engine are not injected; configure this extension as trusted and inject credentials of type kubernetes-engine")
 	}
 
 	log.Info().Msgf("Checking if credential %v exists...", params.Credentials)
@@ -313,7 +325,7 @@ func initCredential(ctx context.Context, params params) *GKECredentials {
 	}
 
 	log.Info().Msgf("Storing gcp credential %v on disk...", params.Credentials)
-	err = ioutil.WriteFile("/key-file.json", []byte(credential.AdditionalProperties.ServiceAccountKeyfile), 0600)
+	err := ioutil.WriteFile("/key-file.json", []byte(credential.AdditionalProperties.ServiceAccountKeyfile), 0600)
 	if err != nil {
 		log.Fatal().Err(err).Msg("Failed writing service account keyfile")
 	}
