@@ -31,7 +31,8 @@ var (
 )
 
 var (
-	paramsYAML = kingpin.Flag("params-yaml", "Extension parameters, created from custom properties.").Envar("ESTAFETTE_EXTENSION_CUSTOM_PROPERTIES_YAML").Required().String()
+	paramsYAML    = kingpin.Flag("params-yaml", "Extension parameters, created from custom properties.").Envar("ESTAFETTE_EXTENSION_CUSTOM_PROPERTIES_YAML").Required().String()
+	releaseAction = kingpin.Flag("release-action", "Name of the release action, to control the type of release.").Envar("ESTAFETTE_RELEASE_ACTION").String()
 
 	gitName           = kingpin.Flag("git-name", "Repository name, used as application name if not passed explicitly and app label not being set.").Envar("ESTAFETTE_GIT_NAME").String()
 	appLabel          = kingpin.Flag("app-name", "App label, used as application name if not passed explicitly.").Envar("ESTAFETTE_LABEL_APP").String()
@@ -60,7 +61,7 @@ func main() {
 	}
 
 	log.Info().Msg("Setting defaults for parameters that are not set in the manifest...")
-	params.SetDefaults(*gitName, *appLabel, *buildVersion, *releaseTargetName)
+	params.SetDefaults(*gitName, *appLabel, *buildVersion, *releaseTargetName, *releaseAction)
 
 	labelSelector := fmt.Sprintf("app.kubernetes.io/instance=%v", params.ReleaseName)
 	if params.LabelSelectorOverride != "" {

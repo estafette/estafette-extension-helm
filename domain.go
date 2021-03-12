@@ -24,7 +24,11 @@ type params struct {
 	Version                      string `json:"version,omitempty" yaml:"version,omitempty"`
 }
 
-func (p *params) SetDefaults(gitName string, appLabel string, buildVersion string, releaseTargetName string) {
+func (p *params) SetDefaults(gitName string, appLabel string, buildVersion string, releaseTargetName string, releaseAction string) {
+
+	if p.Action == "" && releaseAction != "" {
+		p.Action = releaseAction
+	}
 
 	// set chart name
 	if p.Chart == "" {
