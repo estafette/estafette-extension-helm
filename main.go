@@ -259,29 +259,7 @@ func main() {
 		}
 
 		log.Info().Msg("Showing template to be installed...")
-		output, err := foundation.GetCommandOutput(ctx, "helm status %v --namespace %v", params.ReleaseName, params.Namespace)
-		if err != nil && strings.Contains(output, "release: not found") {
-			// there might already be resources, so we'll generate a template and run kubectl diff instead
-			output, err = foundation.GetCommandOutput(ctx, "helm template %v %v %v --namespace %v", params.ReleaseName, filename, overrideValuesFilesParameter, params.Namespace)
-			log.Info().Msg(output)
-
-			templateFile, err := ioutil.TempFile("", "kubernetes.yaml")
-			if err != nil {
-				log.Fatal().Err(err).Msg("Failed creating temporary file for kubectl diff")
-			}
-			_, err = templateFile.WriteString(output)
-			if err != nil {
-				log.Fatal().Err(err).Msg("Failed writing to temporary file for kubectl diff")
-			}
-			err = templateFile.Close()
-			if err != nil {
-				log.Fatal().Err(err).Msg("Failed closing temporary file for kubectl diff")
-			}
-
-			foundation.RunCommand(ctx, "kubectl diff -f %v -n %v", templateFile.Name(), params.Namespace)
-		} else {
-			foundation.RunCommand(ctx, "helm diff upgrade %v %v %v --namespace %v --allow-unreleased", params.ReleaseName, filename, overrideValuesFilesParameter, params.Namespace)
-		}
+		foundation.RunCommand(ctx, "helm diff upgrade %v %v %v --namespace %v --allow-unreleased", params.ReleaseName, filename, overrideValuesFilesParameter, params.Namespace)
 
 		if params.Action == "install" {
 			log.Printf("\nInstalling chart and waiting for %v for it to be ready...\n", params.Timeout)
