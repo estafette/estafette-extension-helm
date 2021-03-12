@@ -35,13 +35,14 @@ func TestSetDefaults(t *testing.T) {
 		appLabel := "app-label"
 		buildVersion := "1.0.0"
 		releaseTargetName := ""
+		releaseAction := ""
 
 		params := params{
 			Chart: "",
 		}
 
 		// act
-		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName)
+		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName, releaseAction)
 
 		assert.Equal(t, "app-label", params.Chart)
 	})
@@ -52,13 +53,14 @@ func TestSetDefaults(t *testing.T) {
 		appLabel := ""
 		buildVersion := "1.0.0"
 		releaseTargetName := ""
+		releaseAction := ""
 
 		params := params{
 			Chart: "",
 		}
 
 		// act
-		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName)
+		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName, releaseAction)
 
 		assert.Equal(t, "git-name", params.Chart)
 	})
@@ -69,13 +71,14 @@ func TestSetDefaults(t *testing.T) {
 		appLabel := "app-label"
 		buildVersion := "1.0.0"
 		releaseTargetName := ""
+		releaseAction := ""
 
 		params := params{
 			Chart: "mychart",
 		}
 
 		// act
-		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName)
+		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName, releaseAction)
 
 		assert.Equal(t, "mychart", params.Chart)
 	})
@@ -86,13 +89,14 @@ func TestSetDefaults(t *testing.T) {
 		appLabel := "app-label"
 		buildVersion := "1.0.0"
 		releaseTargetName := ""
+		releaseAction := ""
 
 		params := params{
 			AppVersion: "",
 		}
 
 		// act
-		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName)
+		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName, releaseAction)
 
 		assert.Equal(t, "1.0.0", params.AppVersion)
 	})
@@ -103,13 +107,14 @@ func TestSetDefaults(t *testing.T) {
 		appLabel := "app-label"
 		buildVersion := "1.0.0"
 		releaseTargetName := ""
+		releaseAction := ""
 
 		params := params{
 			AppVersion: "2.0.0",
 		}
 
 		// act
-		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName)
+		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName, releaseAction)
 
 		assert.Equal(t, "2.0.0", params.AppVersion)
 	})
@@ -120,13 +125,14 @@ func TestSetDefaults(t *testing.T) {
 		appLabel := "app-label"
 		buildVersion := "1.0.0"
 		releaseTargetName := ""
+		releaseAction := ""
 
 		params := params{
 			Version: "",
 		}
 
 		// act
-		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName)
+		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName, releaseAction)
 
 		assert.Equal(t, "1.0.0", params.Version)
 	})
@@ -137,13 +143,14 @@ func TestSetDefaults(t *testing.T) {
 		appLabel := "app-label"
 		buildVersion := "1.0.0"
 		releaseTargetName := ""
+		releaseAction := ""
 
 		params := params{
 			Version: "2.0.0",
 		}
 
 		// act
-		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName)
+		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName, releaseAction)
 
 		assert.Equal(t, "2.0.0", params.Version)
 	})
@@ -154,13 +161,14 @@ func TestSetDefaults(t *testing.T) {
 		appLabel := "app-label"
 		buildVersion := "1.0.0"
 		releaseTargetName := ""
+		releaseAction := ""
 
 		params := params{
 			KindHost: "",
 		}
 
 		// act
-		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName)
+		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName, releaseAction)
 
 		assert.Equal(t, "kubernetes", params.KindHost)
 	})
@@ -171,13 +179,14 @@ func TestSetDefaults(t *testing.T) {
 		appLabel := "app-label"
 		buildVersion := "1.0.0"
 		releaseTargetName := ""
+		releaseAction := ""
 
 		params := params{
 			KindHost: "kind",
 		}
 
 		// act
-		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName)
+		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName, releaseAction)
 
 		assert.Equal(t, "kind", params.KindHost)
 	})
@@ -188,13 +197,14 @@ func TestSetDefaults(t *testing.T) {
 		appLabel := "app-label"
 		buildVersion := "1.0.0"
 		releaseTargetName := ""
+		releaseAction := ""
 
 		params := params{
 			Timeout: "",
 		}
 
 		// act
-		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName)
+		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName, releaseAction)
 
 		assert.Equal(t, "120s", params.Timeout)
 	})
@@ -205,13 +215,14 @@ func TestSetDefaults(t *testing.T) {
 		appLabel := "app-label"
 		buildVersion := "1.0.0"
 		releaseTargetName := ""
+		releaseAction := ""
 
 		params := params{
 			Timeout: "60s",
 		}
 
 		// act
-		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName)
+		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName, releaseAction)
 
 		assert.Equal(t, "60s", params.Timeout)
 	})
@@ -222,13 +233,14 @@ func TestSetDefaults(t *testing.T) {
 		appLabel := "app-label"
 		buildVersion := "1.0.0"
 		releaseTargetName := ""
+		releaseAction := ""
 
 		params := params{
 			HelmSubdirectory: "",
 		}
 
 		// act
-		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName)
+		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName, releaseAction)
 
 		assert.Equal(t, "helm", params.HelmSubdirectory)
 	})
@@ -239,13 +251,14 @@ func TestSetDefaults(t *testing.T) {
 		appLabel := "app-label"
 		buildVersion := "1.0.0"
 		releaseTargetName := ""
+		releaseAction := ""
 
 		params := params{
 			HelmSubdirectory: "./",
 		}
 
 		// act
-		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName)
+		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName, releaseAction)
 
 		assert.Equal(t, "./", params.HelmSubdirectory)
 	})
@@ -256,13 +269,14 @@ func TestSetDefaults(t *testing.T) {
 		appLabel := "app-label"
 		buildVersion := "1.0.0"
 		releaseTargetName := ""
+		releaseAction := ""
 
 		params := params{
 			RepositoryDirectory: "",
 		}
 
 		// act
-		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName)
+		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName, releaseAction)
 
 		assert.Equal(t, "helm-charts", params.RepositoryDirectory)
 	})
@@ -273,13 +287,14 @@ func TestSetDefaults(t *testing.T) {
 		appLabel := "app-label"
 		buildVersion := "1.0.0"
 		releaseTargetName := ""
+		releaseAction := ""
 
 		params := params{
 			RepositoryDirectory: "charts-repo",
 		}
 
 		// act
-		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName)
+		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName, releaseAction)
 
 		assert.Equal(t, "charts-repo", params.RepositoryDirectory)
 	})
@@ -290,13 +305,14 @@ func TestSetDefaults(t *testing.T) {
 		appLabel := "app-label"
 		buildVersion := "1.0.0"
 		releaseTargetName := ""
+		releaseAction := ""
 
 		params := params{
 			RepositoryChartsSubdirectory: "",
 		}
 
 		// act
-		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName)
+		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName, releaseAction)
 
 		assert.Equal(t, "charts", params.RepositoryChartsSubdirectory)
 	})
@@ -307,13 +323,14 @@ func TestSetDefaults(t *testing.T) {
 		appLabel := "app-label"
 		buildVersion := "1.0.0"
 		releaseTargetName := ""
+		releaseAction := ""
 
 		params := params{
 			RepositoryChartsSubdirectory: "./",
 		}
 
 		// act
-		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName)
+		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName, releaseAction)
 
 		assert.Equal(t, "./", params.RepositoryChartsSubdirectory)
 	})
@@ -324,13 +341,14 @@ func TestSetDefaults(t *testing.T) {
 		appLabel := "app-label"
 		buildVersion := "1.0.0"
 		releaseTargetName := ""
+		releaseAction := ""
 
 		params := params{
 			RepositoryURL: "",
 		}
 
 		// act
-		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName)
+		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName, releaseAction)
 
 		assert.Equal(t, "https://helm.estafette.io/", params.RepositoryURL)
 	})
@@ -341,13 +359,14 @@ func TestSetDefaults(t *testing.T) {
 		appLabel := "app-label"
 		buildVersion := "1.0.0"
 		releaseTargetName := ""
+		releaseAction := ""
 
 		params := params{
 			RepositoryURL: "https://helm-beta.estafette.io/",
 		}
 
 		// act
-		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName)
+		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName, releaseAction)
 
 		assert.Equal(t, "https://helm-beta.estafette.io/", params.RepositoryURL)
 	})
@@ -358,6 +377,7 @@ func TestSetDefaults(t *testing.T) {
 		appLabel := "app-label"
 		buildVersion := "1.0.0"
 		releaseTargetName := ""
+		releaseAction := ""
 
 		params := params{
 			Chart:       "mychart",
@@ -365,7 +385,7 @@ func TestSetDefaults(t *testing.T) {
 		}
 
 		// act
-		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName)
+		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName, releaseAction)
 
 		assert.Equal(t, "mychart", params.ReleaseName)
 	})
@@ -376,6 +396,7 @@ func TestSetDefaults(t *testing.T) {
 		appLabel := "app-label"
 		buildVersion := "1.0.0"
 		releaseTargetName := ""
+		releaseAction := ""
 
 		params := params{
 			Chart:       "mychart",
@@ -383,7 +404,7 @@ func TestSetDefaults(t *testing.T) {
 		}
 
 		// act
-		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName)
+		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName, releaseAction)
 
 		assert.Equal(t, "myrelease", params.ReleaseName)
 	})
@@ -394,13 +415,14 @@ func TestSetDefaults(t *testing.T) {
 		appLabel := "app-label"
 		buildVersion := "1.0.0"
 		releaseTargetName := "development"
+		releaseAction := ""
 
 		params := params{
 			Credentials: "",
 		}
 
 		// act
-		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName)
+		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName, releaseAction)
 
 		assert.Equal(t, "gke-development", params.Credentials)
 	})
@@ -411,14 +433,51 @@ func TestSetDefaults(t *testing.T) {
 		appLabel := "app-label"
 		buildVersion := "1.0.0"
 		releaseTargetName := "development"
+		releaseAction := ""
 
 		params := params{
 			Credentials: "gke-staging",
 		}
 
 		// act
-		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName)
+		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName, releaseAction)
 
 		assert.Equal(t, "gke-staging", params.Credentials)
+	})
+
+	t.Run("SetsActionToReleaseActionIfEmpty", func(t *testing.T) {
+
+		gitName := "git-name"
+		appLabel := "app-label"
+		buildVersion := "1.0.0"
+		releaseTargetName := "development"
+		releaseAction := "diff"
+
+		params := params{
+			Action: "",
+		}
+
+		// act
+		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName, releaseAction)
+
+		assert.Equal(t, "diff", params.Action)
+	})
+
+	t.Run("KeepsActionIfSet", func(t *testing.T) {
+
+		gitName := "git-name"
+		appLabel := "app-label"
+		buildVersion := "1.0.0"
+		releaseTargetName := "development"
+		releaseAction := "diff"
+
+		params := params{
+			Action: "install",
+		}
+
+		// act
+		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName, releaseAction)
+
+		assert.Equal(t, "install", params.Action)
 	})
 }
