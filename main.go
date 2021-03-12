@@ -263,6 +263,7 @@ func main() {
 		if err != nil && strings.Contains(output, "release: not found") {
 			// there might already be resources, so we'll generate a template and run kubectl diff instead
 			output, err = foundation.GetCommandOutput(ctx, "helm template %v %v %v --namespace %v", params.ReleaseName, filename, overrideValuesFilesParameter, params.Namespace)
+			log.Info().Msg(output)
 
 			templateFile, err := ioutil.TempFile("", "kubernetes.yaml")
 			if err != nil {
