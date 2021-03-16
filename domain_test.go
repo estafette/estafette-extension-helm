@@ -191,7 +191,7 @@ func TestSetDefaults(t *testing.T) {
 		assert.Equal(t, "kind", params.KindHost)
 	})
 
-	t.Run("SetsTimeoutTo120sIfEmpty", func(t *testing.T) {
+	t.Run("SetsTimeoutTo300sIfEmpty", func(t *testing.T) {
 
 		gitName := "git-name"
 		appLabel := "app-label"
@@ -206,7 +206,7 @@ func TestSetDefaults(t *testing.T) {
 		// act
 		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName, releaseAction)
 
-		assert.Equal(t, "120s", params.Timeout)
+		assert.Equal(t, "300s", params.Timeout)
 	})
 
 	t.Run("KeepsTimeoutIfSet", func(t *testing.T) {

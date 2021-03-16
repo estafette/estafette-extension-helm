@@ -52,7 +52,7 @@ func (p *params) SetDefaults(gitName string, appLabel string, buildVersion strin
 	}
 
 	if p.Timeout == "" {
-		p.Timeout = "120s"
+		p.Timeout = "300s"
 	}
 
 	if p.HelmSubdirectory == "" {
