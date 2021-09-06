@@ -158,11 +158,11 @@ func main() {
 
 		if err != nil {
 			log.Printf("Installation failed, showing logs...")
-			foundation.RunCommand(ctx, "kubectl get all")
+			foundation.RunCommand(ctx, "kubectl get all,secret")
 			_ = foundation.RunCommandExtended(ctx, "kubectl logs -l %v --all-containers=true", labelSelector)
 
 			log.Info().Msg("Showing all resources...")
-			_ = foundation.RunCommandExtended(ctx, "kubectl get all")
+			_ = foundation.RunCommandExtended(ctx, "kubectl get all,secret")
 			os.Exit(1)
 		}
 
@@ -170,7 +170,7 @@ func main() {
 		_ = foundation.RunCommandExtended(ctx, "kubectl logs -l %v --all-containers=true", labelSelector)
 
 		log.Info().Msg("Showing all resources...")
-		_ = foundation.RunCommandExtended(ctx, "kubectl get all")
+		_ = foundation.RunCommandExtended(ctx, "kubectl get all,secret")
 
 	case "publish":
 		log.Info().Msgf("Publishing chart %v with app version %v and version %v...", params.Chart, params.AppVersion, params.Version)
@@ -271,7 +271,7 @@ func main() {
 			err = foundation.RunCommandExtended(ctx, "helm upgrade --install %v %v %v --namespace %v --history-max 1 --cleanup-on-fail --atomic --timeout %v %v", params.ReleaseName, filename, overrideValuesFilesParameter, params.Namespace, params.Timeout, forceArgument)
 			if err != nil {
 				log.Printf("Installation failed, showing logs...")
-				foundation.RunCommand(ctx, "kubectl get all -n %v", params.Namespace)
+				foundation.RunCommand(ctx, "kubectl get all,secret -n %v", params.Namespace)
 				_ = foundation.RunCommandExtended(ctx, "kubectl logs -l %v -n %v --all-containers=true", labelSelector, params.Namespace)
 				os.Exit(1)
 			}
