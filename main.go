@@ -147,7 +147,6 @@ func main() {
 				log.Fatal().Msgf("File %v specified with valuesFile does not exist; did you forget to set clone: true on your release target?", params.ValuesFile)
 			}
 			overrideValuesFilesParameter = fmt.Sprintf("-f %v", params.ValuesFile)
-			foundation.RunCommand(ctx, "cat override.yaml")
 		}
 
 		filename := fmt.Sprintf("%v-%v.tgz", params.Chart, params.Version)
