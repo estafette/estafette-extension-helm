@@ -21,6 +21,7 @@ type params struct {
 	Bucket                       string `json:"bucket,omitempty" yaml:"bucket,omitempty"`
 	Timeout                      string `json:"timeout,omitempty" yaml:"timeout,omitempty"`
 	Values                       string `json:"values,omitempty" yaml:"values,omitempty"`
+	ValuesFile                   string `json:"valuesFile,omitempty" yaml:"valuesFile,omitempty"`
 	Version                      string `json:"version,omitempty" yaml:"version,omitempty"`
 }
 
