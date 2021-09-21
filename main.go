@@ -72,7 +72,7 @@ func main() {
 	case
 		"lint":
 		log.Info().Msgf("Linting chart %v...", params.Chart)
-		foundation.RunCommand(ctx, "helm lint %v", filepath.Join(params.HelmSubdirectory, params.Chart))
+		foundation.RunCommand(ctx, "helm lint --with-subcharts %v", filepath.Join(params.HelmSubdirectory, params.Chart))
 
 	case "package":
 		addRequirementRepositories(ctx, params)
