@@ -81,6 +81,7 @@ stages:
           && wget -O google-cloud-sdk.tar.gz https://dl.google.com/dl/cloudsdk/channels/rapid/downloads/google-cloud-sdk-${CLOUD_SDK_VERSION}-linux-x86_64.tar.gz \
           && tar xzf google-cloud-sdk.tar.gz -C / \
           && rm google-cloud-sdk.tar.gz \
+          && rm -rf google-cloud-sdk/bin/anthoscli \
           && gcloud config set core/disable_usage_reporting true \
           && gcloud components install gke-gcloud-auth-plugin \
           && gcloud config set component_manager/disable_update_check true \
