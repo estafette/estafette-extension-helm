@@ -35,9 +35,9 @@ stages:
             description="The ${ESTAFETTE_GIT_NAME} component is an Estafette extension to with linting, packaging, testing and adding Helm charts to repositories"
 
       ENV VERSION="${ESTAFETTE_BUILD_VERSION}" \
-          HELM_VERSION="v3.9.0" \
-          HELM_DIFF_VERSION="v3.5.0" \
-          HELM_GCS_VERSION="0.3.22" \
+          HELM_VERSION="v3.10.1" \
+          HELM_DIFF_VERSION="v3.6.0" \
+          HELM_GCS_VERSION="0.4.0" \
           KUBECTL_VERSION="v1.24.3" \
           CLOUD_SDK_VERSION="408.0.0-alpine"
 
