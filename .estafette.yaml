@@ -13,7 +13,7 @@ version:
 
 stages:
   build:
-    image: golang:1.17-alpine
+    image: golang:1.20-alpine
     env:
       CGO_ENABLED: 0
       GOOS: linux
@@ -29,17 +29,17 @@ stages:
     dontExpand:
     - PATH
     inline: |
-      FROM alpine:3.16
+      FROM alpine:3.18
 
       LABEL maintainer="estafette.io" \
             description="The ${ESTAFETTE_GIT_NAME} component is an Estafette extension to with linting, packaging, testing and adding Helm charts to repositories"
 
       ENV VERSION="${ESTAFETTE_BUILD_VERSION}" \
-          HELM_VERSION="v3.10.1" \
-          HELM_DIFF_VERSION="v3.6.0" \
-          HELM_GCS_VERSION="0.4.0" \
+          HELM_VERSION="v3.12.0" \
+          HELM_DIFF_VERSION="v3.8.1" \
+          HELM_GCS_VERSION="0.4.2" \
           KUBECTL_VERSION="v1.24.3" \
-          CLOUD_SDK_VERSION="408.0.0-alpine"
+          CLOUD_SDK_VERSION="434.0.0-alpine"
 
       RUN apk add --update --upgrade  --no-cache \
             git \
