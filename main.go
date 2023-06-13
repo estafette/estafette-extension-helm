@@ -280,7 +280,7 @@ func main() {
 			if params.Force {
 				forceArgument = "--force"
 			}
-			err = foundation.RunCommandExtended(ctx, "helm upgrade --install %v %v %v --namespace %v --history-max 1 --cleanup-on-fail --atomic --timeout %v %v", params.ReleaseName, filename, overrideValuesFilesParameter, params.Namespace, params.Timeout, forceArgument)
+			err = foundation.RunCommandExtended(ctx, "helm upgrade --install %v %v %v --namespace %v --history-max 1 --cleanup-on-fail --atomic --timeout %v %v --create-namespace", params.ReleaseName, filename, overrideValuesFilesParameter, params.Namespace, params.Timeout, forceArgument)
 			if err != nil {
 				log.Printf("Installation failed, showing logs...")
 				foundation.RunCommand(ctx, "kubectl get all,secret -n %v", params.Namespace)
