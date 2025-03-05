@@ -156,11 +156,18 @@ func main() {
 			foundation.RunCommand(ctx, "helm fetch %v --version %v --repo %v", params.Chart, params.Version, params.RepositoryURL)
 		}
 
+		setFilesParameter := ""
+		if params.FileParams != nil {
+			for _, fileParam := range params.FileParams {
+				setFilesParameter = fmt.Sprintf("%v --set-file %v=%v", setFilesParameter, fileParam.Name, fileParam.Path)
+			}
+		}
+
 		log.Info().Msg("Showing template to be installed...")
-		foundation.RunCommand(ctx, "helm diff upgrade %v %v %v --allow-unreleased", params.Chart, filename, overrideValuesFilesParameter)
+		foundation.RunCommand(ctx, "helm diff upgrade %v %v %v %v --allow-unreleased", params.Chart, filename, overrideValuesFilesParameter, setFilesParameter)
 
 		log.Printf("\nInstalling chart file %v and waiting for %v for it to be ready...\n", filename, params.Timeout)
-		err = foundation.RunCommandExtended(ctx, "helm upgrade --install %v %v %v --history-max 1 --timeout %v", params.Chart, filename, overrideValuesFilesParameter, params.Timeout)
+		err = foundation.RunCommandExtended(ctx, "helm upgrade --install %v %v %v %v --history-max 1 --timeout %v", params.Chart, filename, overrideValuesFilesParameter, setFilesParameter, params.Timeout)
 
 		if err != nil {
 			log.Printf("Installation failed, showing logs...")
@@ -271,8 +278,16 @@ func main() {
 			foundation.RunCommand(ctx, "helm fetch %v --version %v --repo %v", params.Chart, params.Version, params.RepositoryURL)
 		}
 
+
+		setFilesParameter := ""
+		if params.FileParams != nil {
+			for _, fileParam := range params.FileParams {
+				setFilesParameter = fmt.Sprintf("%v --set-file %v=%v", setFilesParameter, fileParam.Name, fileParam.Path)
+			}
+		}
+
 		log.Info().Msg("Showing template to be installed...")
-		foundation.RunCommand(ctx, "helm diff upgrade %v %v %v --namespace %v --allow-unreleased", params.ReleaseName, filename, overrideValuesFilesParameter, params.Namespace)
+		foundation.RunCommand(ctx, "helm diff upgrade %v %v %v %v --namespace %v --allow-unreleased", params.ReleaseName, filename, overrideValuesFilesParameter, setFilesParameter, params.Namespace)
 
 		if params.Action == "install" {
 			log.Printf("\nInstalling chart and waiting for %v for it to be ready...\n", params.Timeout)
@@ -280,7 +295,7 @@ func main() {
 			if params.Force {
 				forceArgument = "--force"
 			}
-			err = foundation.RunCommandExtended(ctx, "helm upgrade --install %v %v %v --namespace %v --history-max 1 --cleanup-on-fail --atomic --timeout %v %v --create-namespace", params.ReleaseName, filename, overrideValuesFilesParameter, params.Namespace, params.Timeout, forceArgument)
+			err = foundation.RunCommandExtended(ctx, "helm upgrade --install %v %v %v %v --namespace %v --history-max 1 --cleanup-on-fail --atomic --timeout %v %v --create-namespace", params.ReleaseName, filename, overrideValuesFilesParameter, setFilesParameter, params.Namespace, params.Timeout, forceArgument)
 			if err != nil {
 				log.Printf("Installation failed, showing logs...")
 				foundation.RunCommand(ctx, "kubectl get all,secret -n %v", params.Namespace)
