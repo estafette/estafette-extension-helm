@@ -22,7 +22,8 @@ This extension helps with linting, packaging, testing and adding Helm charts to 
 | `timeout`             | string | The time with units to wait for install during the `test` action to finish; defaults to 120s                                                        |
 | `values`              | string | Contents of a values.yaml files to use with the install command during the `test` action in order to set required values                            |
 | `version`             | string | Can be used to override the package version; defauls to `$ESTAFETTE_BUILD_VERSION`                                                                  |
-
+| `files.name`          | string | Can be used to set the key value in the --set-files option                                                                                          |
+| `files.path`          | string | Can be used to set the path in the --set-files option                                                                                               |
 ## Usage
 
 In order to use this extension in your `.estafette.yaml` manifest for the various supported actions use the following snippets:
