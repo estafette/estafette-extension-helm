@@ -1,6 +1,6 @@
 module github.com/estafette/estafette-extension-helm
 
-go 1.20
+go 1.22
 
 require (
 	github.com/alecthomas/kingpin v2.2.6+incompatible
