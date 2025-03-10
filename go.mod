@@ -3,12 +3,12 @@ module github.com/estafette/estafette-extension-helm
 go 1.23
 
 require (
-	github.com/alecthomas/kingpin v2.2.6+incompatible
+	github.com/alecthomas/kingpin v2.4.0
 	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect
 	github.com/alecthomas/units v0.0.0-20211218093645-b94a6e3cc137 // indirect
-	github.com/estafette/estafette-foundation v0.0.80
-	github.com/rs/zerolog v1.28.0
-	github.com/stretchr/testify v1.8.0
+	github.com/estafette/estafette-foundation v0.0.82
+	github.com/rs/zerolog v1.33.0
+	github.com/stretchr/testify v1.10.0
 	gopkg.in/yaml.v3 v3.0.1
 )
 
