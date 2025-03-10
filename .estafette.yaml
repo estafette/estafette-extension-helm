@@ -60,8 +60,8 @@ stages:
           && curl -L https://github.com/roboll/helmfile/releases/download/${HELMFILE_VERSION}/helmfile_linux_amd64 -o /usr/bin/helmfile \
           && chmod +x /usr/bin/helmfile \
           # install kubectl
-          && wget -O /usr/local/bin/kubectl https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl \
-          && echo "$(cat kubectl.sha256)  /usr/bin/kubectl" | sha256sum -c - \
+          && curl -L "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" --output /usr/local/bin/kubectl \
+          && echo "$(cat kubectl.sha256)  /usr/local/bin/kubectl" | sha256sum -c - \
           && chmod +x /usr/local/bin/kubectl \
           && kubectl version --client \
           # misc
