@@ -166,15 +166,15 @@ func main() {
 		}
 		
 		resetValuesParameter := ""
-		// if params.ResetValues {
-		// 	setFilesParameter = fmt.Sprintf("%v --reset-values", resetValuesParameter)
-		// }
+		if params.ResetValues {
+			setFilesParameter = fmt.Sprintf("%v --reset-values", resetValuesParameter)
+		}
 
 		log.Info().Msg("Showing template to be installed...")
 		foundation.RunCommand(ctx, "helm diff upgrade %v %v %v %v %v --allow-unreleased", params.Chart, filename, overrideValuesFilesParameter, setFilesParameter,resetValuesParameter)
 
 		log.Printf("\nInstalling chart file %v and waiting for %v for it to be ready...\n", filename, params.Timeout)
-		err = foundation.RunCommandExtended(ctx, "helm upgrade --install %v %v %v %v %v --history-max 1 --timeout %v", params.Chart, filename, overrideValuesFilesParameter, setFilesParameter, resetValuesParameter params.Timeout)
+		err = foundation.RunCommandExtended(ctx, "helm upgrade --install %v %v %v %v %v --history-max 1 --timeout %v", params.Chart, filename, overrideValuesFilesParameter, setFilesParameter, resetValuesParamete, params.Timeout)
 
 		if err != nil {
 			log.Printf("Installation failed, showing logs...")
