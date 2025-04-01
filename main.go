@@ -161,7 +161,7 @@ func main() {
 			fileKeyValueList :=[]string{}
 			for _, fileParam := range params.FileParams {
 				fileKeyValueList = append(fileKeyValueList, fmt.Sprintf("%v=%v", fileParam.Name, fileParam.Path))
-			setFilesParameter = fmt.Sprintf("--set-file %v", setFilesParameter, strings.Join(fileKeyValueList,","))
+			setFilesParameter = fmt.Sprintf("--set-file %v", strings.Join(fileKeyValueList,","))
 			}
 		}
 		
@@ -291,7 +291,7 @@ func main() {
 			fileKeyValueList :=[]string{}
 			for _, fileParam := range params.FileParams {
 				fileKeyValueList = append(fileKeyValueList, fmt.Sprintf("%v=%v", fileParam.Name, fileParam.Path))
-			setFilesParameter = fmt.Sprintf("--set-file %v", setFilesParameter, strings.Join(fileKeyValueList,","))
+			setFilesParameter = fmt.Sprintf("--set-file %v", strings.Join(fileKeyValueList,","))
 			}
 		}
 		
