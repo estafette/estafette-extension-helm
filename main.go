@@ -162,6 +162,7 @@ func main() {
 			for _, fileParam := range params.FileParams {
 				fileKeyValueList = append(fileKeyValueList, fmt.Sprintf("%v=%v", fileParam.Name, fileParam.Path))
 			setFilesParameter = fmt.Sprintf("--set-file %v", setFilesParameter, strings.Join(fileKeyValueList))
+			}
 		}
 		
 		resetValuesParameter := ""
@@ -291,6 +292,7 @@ func main() {
 			for _, fileParam := range params.FileParams {
 				fileKeyValueList = append(fileKeyValueList, fmt.Sprintf("%v=%v", fileParam.Name, fileParam.Path))
 			setFilesParameter = fmt.Sprintf("--set-file %v", setFilesParameter, strings.Join(fileKeyValueList))
+			}
 		}
 
 		resetValuesParameter := ""
