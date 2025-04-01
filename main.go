@@ -161,13 +161,13 @@ func main() {
 			fileKeyValueList :=[]string{}
 			for _, fileParam := range params.FileParams {
 				fileKeyValueList = append(fileKeyValueList, fmt.Sprintf("%v=%v", fileParam.Name, fileParam.Path))
-			setFilesParameter = fmt.Sprintf("--set-file %v", setFilesParameter, strings.Join(fileKeyValueList))
+			setFilesParameter = fmt.Sprintf("--set-file %v", setFilesParameter, strings.Join(fileKeyValueList,","))
 			}
 		}
 		
 		resetValuesParameter := ""
 		if params.ResetValues {
-			setFilesParameter = fmt.Sprintf("%v --reset-values", resetValuesParameter)
+			resetValuesParameter = fmt.Sprintf("%v --reset-values", resetValuesParameter)
 		}
 
 		log.Info().Msg("Showing template to be installed...")
@@ -291,13 +291,13 @@ func main() {
 			fileKeyValueList :=[]string{}
 			for _, fileParam := range params.FileParams {
 				fileKeyValueList = append(fileKeyValueList, fmt.Sprintf("%v=%v", fileParam.Name, fileParam.Path))
-			setFilesParameter = fmt.Sprintf("--set-file %v", setFilesParameter, strings.Join(fileKeyValueList))
+			setFilesParameter = fmt.Sprintf("--set-file %v", setFilesParameter, strings.Join(fileKeyValueList,","))
 			}
 		}
 		
 		resetValuesParameter := ""
 		if params.ResetValues {
-			setFilesParameter = fmt.Sprintf("%v --reset-values", resetValuesParameter)
+			resetValuesParameter = fmt.Sprintf("%v --reset-values", resetValuesParameter)
 		}
 
 		log.Info().Msg("Showing template to be installed...")
