@@ -166,9 +166,9 @@ func main() {
 		}
 		
 		resetValuesParameter := ""
-		if params.ResetValues {
-			setFilesParameter = fmt.Sprintf("%v --reset-values", resetValuesParameter)
-		}
+		// if params.ResetValues {
+		// 	setFilesParameter = fmt.Sprintf("%v --reset-values", resetValuesParameter)
+		// }
 
 		log.Info().Msg("Showing template to be installed...")
 		foundation.RunCommand(ctx, "helm diff upgrade %v %v %v %v %v --allow-unreleased", params.Chart, filename, overrideValuesFilesParameter, setFilesParameter,resetValuesParameter)
