@@ -156,9 +156,9 @@ func main() {
 			foundation.RunCommand(ctx, "helm fetch %v --version %v --repo %v", params.Chart, params.Version, params.RepositoryURL)
 		}
 
-		setFilesParameter := []string{}
+		setFilesParameter := ""
 		if params.FileParams != nil {			
-			fileKeyValueList :=[]
+			fileKeyValueList :=[]string{}
 			for _, fileParam := range params.FileParams {
 				fileKeyValueList = append(fileKeyValueList, fmt.Sprintf("%v=%v", fileParam.Name, fileParam.Path))
 			setFilesParameter = fmt.Sprintf("--set-file %v", setFilesParameter, strings.Join(fileKeyValueList))
