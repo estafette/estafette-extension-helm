@@ -24,7 +24,7 @@ type params struct {
 	ValuesFile                   string `json:"valuesFile,omitempty" yaml:"valuesFile,omitempty"`
 	Version                      string `json:"version,omitempty" yaml:"version,omitempty"`
 	FileParams             []FileParams `json:"files,omitempty" yaml:"files,omitempty"`
-	ResetValies                  bool   `json:"resetValues,omitempty" yaml:"resetValues,omitempty"`
+	ResetValues                  bool   `json:"resetValues,omitempty" yaml:"resetValues,omitempty"`
 }
 
 type FileParams struct {

@@ -288,13 +288,13 @@ func main() {
 
 		setFilesParameter := ""
 		if params.FileParams != nil {			
-			setFilesParameter := []string{}
+			fileKeyValueList :=[]string{}
 			for _, fileParam := range params.FileParams {
 				fileKeyValueList = append(fileKeyValueList, fmt.Sprintf("%v=%v", fileParam.Name, fileParam.Path))
 			setFilesParameter = fmt.Sprintf("--set-file %v", setFilesParameter, strings.Join(fileKeyValueList))
 			}
 		}
-
+		
 		resetValuesParameter := ""
 		if params.ResetValues {
 			setFilesParameter = fmt.Sprintf("%v --reset-values", resetValuesParameter)
