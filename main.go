@@ -171,10 +171,10 @@ func main() {
 		}
 
 		log.Info().Msg("Showing template to be installed...")
-		foundation.RunCommand(ctx, "helm diff upgrade %v %v %v %v %v --allow-unreleased", params.Chart, filename, overrideValuesFilesParameter, setFilesParameter,resetValuesParameter)
+		foundation.RunCommand(ctx, "helm diff upgrade %v %v %v %v %v --allow-unreleased", params.Chart, filename, resetValuesParameter, overrideValuesFilesParameter, setFilesParameter)
 
 		log.Printf("\nInstalling chart file %v and waiting for %v for it to be ready...\n", filename, params.Timeout)
-		err = foundation.RunCommandExtended(ctx, "helm upgrade --install %v %v %v %v %v --history-max 1 --timeout %v", params.Chart, filename, overrideValuesFilesParameter, setFilesParameter, resetValuesParameter, params.Timeout)
+		err = foundation.RunCommandExtended(ctx, "helm upgrade --install %v %v %v %v %v --history-max 1 --timeout %v", params.Chart, filename, resetValuesParameter, overrideValuesFilesParameter, setFilesParameter, params.Timeout)
 
 		if err != nil {
 			log.Printf("Installation failed, showing logs...")
@@ -301,7 +301,7 @@ func main() {
 		}
 
 		log.Info().Msg("Showing template to be installed...")
-		foundation.RunCommand(ctx, "helm diff upgrade %v %v %v %v %v --namespace %v --allow-unreleased", params.ReleaseName, filename, overrideValuesFilesParameter, setFilesParameter, resetValuesParameter, params.Namespace)
+		foundation.RunCommand(ctx, "helm diff upgrade %v %v %v %v %v --namespace %v --allow-unreleased", params.ReleaseName, filename, resetValuesParameter, overrideValuesFilesParameter, setFilesParameter, params.Namespace)
 
 		if params.Action == "install" {
 			log.Printf("\nInstalling chart and waiting for %v for it to be ready...\n", params.Timeout)
@@ -309,7 +309,7 @@ func main() {
 			if params.Force {
 				forceArgument = "--force"
 			}
-			err = foundation.RunCommandExtended(ctx, "helm upgrade --install %v %v %v %v %v --namespace %v --history-max 1 --cleanup-on-fail --atomic --timeout %v %v --create-namespace", params.ReleaseName, filename, overrideValuesFilesParameter, setFilesParameter, resetValuesParameter, params.Namespace, params.Timeout, forceArgument)
+			err = foundation.RunCommandExtended(ctx, "helm upgrade --install %v %v %v %v %v --namespace %v --history-max 1 --cleanup-on-fail --atomic --timeout %v %v --create-namespace", params.ReleaseName, filename, resetValuesParameter, overrideValuesFilesParameter, setFilesParameter, params.Namespace, params.Timeout, forceArgument)
 			if err != nil {
 				log.Printf("Installation failed, showing logs...")
 				foundation.RunCommand(ctx, "kubectl get all,secret -n %v", params.Namespace)
