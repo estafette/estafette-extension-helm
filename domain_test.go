@@ -371,6 +371,69 @@ func TestSetDefaults(t *testing.T) {
 		assert.Equal(t, "https://helm-beta.estafette.io/", params.RepositoryURL)
 	})
 
+	t.Run("KeepFileValuesIfSet", func(t *testing.T) {
+
+		gitName := "git-name"
+		appLabel := "app-label"
+		buildVersion := "1.0.0"
+		releaseTargetName := ""
+		releaseAction := ""
+
+		params := params{
+			FileParams: []FileParams{
+				{
+				Name: "file.value.a",
+				Path: "my/path/a",
+				},
+				{
+					Name: "file.value.b",
+					Path: "my/path/b",
+				}
+			}
+		}
+
+		// act
+		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName, releaseAction)
+
+		assert.Equal(t, "file.value.a", params.FileParams[0].Name)
+		assert.Equal(t, "my/path/a", params.FileParams[0].Path)
+		assert.Equal(t, "file.value.b", params.FileParams[1].Name)
+		assert.Equal(t, "my/path/b", params.FileParams[1].Path)
+	})
+
+	t.Run("KeepResetValuesIfSet", func(t *testing.T) {
+
+		gitName := "git-name"
+		appLabel := "app-label"
+		buildVersion := "1.0.0"
+		releaseTargetName := ""
+		releaseAction := ""
+
+		params := params{
+			ResetValues: true,
+		}
+
+		// act
+		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName, releaseAction)
+
+		assert.Equal(t, true, params.ResetValues)
+	})
+
+	t.Run("SetResetValuesToFalseIfEmpty", func(t *testing.T) {
+
+		gitName := "git-name"
+		appLabel := "app-label"
+		buildVersion := "1.0.0"
+		releaseTargetName := ""
+		releaseAction := ""
+
+		// act
+		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName, releaseAction)
+
+		assert.Equal(t, false, params.ResetValues)
+	})
+
+
 	t.Run("SetsReleaseNameToChartNameIfEmpty", func(t *testing.T) {
 
 		gitName := "git-name"
