@@ -383,12 +383,12 @@ func TestSetDefaults(t *testing.T) {
 			FileParams: []FileParams{
 				{
 				Name: "file.value.a",
-				Path: "my/path/a"
+				Path: "my/path/a",
 				},
 				{
 					Name: "file.value.b",
-					Path: "my/path/b"
-				}
+					Path: "my/path/b",
+				},
 			}
 		}
 
