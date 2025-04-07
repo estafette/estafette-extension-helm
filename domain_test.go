@@ -389,7 +389,7 @@ func TestSetDefaults(t *testing.T) {
 					Name: "file.value.b",
 					Path: "my/path/b",
 				},
-			}
+			},
 		}
 
 		// act
