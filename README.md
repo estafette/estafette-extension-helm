@@ -24,6 +24,7 @@ This extension helps with linting, packaging, testing and adding Helm charts to 
 | `version`             | string | Can be used to override the package version; defauls to `$ESTAFETTE_BUILD_VERSION`                                                                  |
 | `files.name`          | string | Can be used to set the key value in the --set-files option                                                                                          |
 | `files.path`          | string | Can be used to set the path in the --set-files option                                                                                               |
+| `resetValues`         | bool   | Can be used to set the  --reset-files option                                                                                                        |
 ## Usage
 
 In order to use this extension in your `.estafette.yaml` manifest for the various supported actions use the following snippets:
