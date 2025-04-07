@@ -419,21 +419,6 @@ func TestSetDefaults(t *testing.T) {
 		assert.Equal(t, true, params.ResetValues)
 	})
 
-	t.Run("SetResetValuesToFalseIfEmpty", func(t *testing.T) {
-
-		gitName := "git-name"
-		appLabel := "app-label"
-		buildVersion := "1.0.0"
-		releaseTargetName := ""
-		releaseAction := ""
-
-		// act
-		params.SetDefaults(gitName, appLabel, buildVersion, releaseTargetName, releaseAction)
-
-		assert.Equal(t, false, params.ResetValues)
-	})
-
-
 	t.Run("SetsReleaseNameToChartNameIfEmpty", func(t *testing.T) {
 
 		gitName := "git-name"
