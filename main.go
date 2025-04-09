@@ -17,7 +17,7 @@ import (
 	"github.com/alecthomas/kingpin"
 	foundation "github.com/estafette/estafette-foundation"
 	"github.com/rs/zerolog/log"
-	"gopkg.in/yaml.v2"
+	"gopkg.in/yaml.v3"
 )
 
 var (
@@ -156,11 +156,25 @@ func main() {
 			foundation.RunCommand(ctx, "helm fetch %v --version %v --repo %v", params.Chart, params.Version, params.RepositoryURL)
 		}
 
+		setFilesParameter := ""
+		if params.FileParams != nil {			
+			fileKeyValueList :=[]string{}
+			for _, fileParam := range params.FileParams {
+				fileKeyValueList = append(fileKeyValueList, fmt.Sprintf("%v=%v", fileParam.Name, fileParam.Path))
+			setFilesParameter = fmt.Sprintf("--set-file %v", strings.Join(fileKeyValueList,","))
+			}
+		}
+		
+		resetValuesParameter := ""
+		if params.ResetValues {
+			resetValuesParameter = fmt.Sprintf("%v --reset-values", resetValuesParameter)
+		}
+
 		log.Info().Msg("Showing template to be installed...")
-		foundation.RunCommand(ctx, "helm diff upgrade %v %v %v --allow-unreleased", params.Chart, filename, overrideValuesFilesParameter)
+		foundation.RunCommand(ctx, "helm diff upgrade %v %v %v %v %v --allow-unreleased", params.Chart, filename, resetValuesParameter, overrideValuesFilesParameter, setFilesParameter)
 
 		log.Printf("\nInstalling chart file %v and waiting for %v for it to be ready...\n", filename, params.Timeout)
-		err = foundation.RunCommandExtended(ctx, "helm upgrade --install %v %v %v --history-max 1 --timeout %v", params.Chart, filename, overrideValuesFilesParameter, params.Timeout)
+		err = foundation.RunCommandExtended(ctx, "helm upgrade --install %v %v %v %v %v --history-max 1 --timeout %v", params.Chart, filename, resetValuesParameter, overrideValuesFilesParameter, setFilesParameter, params.Timeout)
 
 		if err != nil {
 			log.Printf("Installation failed, showing logs...")
@@ -271,8 +285,23 @@ func main() {
 			foundation.RunCommand(ctx, "helm fetch %v --version %v --repo %v", params.Chart, params.Version, params.RepositoryURL)
 		}
 
+
+		setFilesParameter := ""
+		if params.FileParams != nil {			
+			fileKeyValueList :=[]string{}
+			for _, fileParam := range params.FileParams {
+				fileKeyValueList = append(fileKeyValueList, fmt.Sprintf("%v=%v", fileParam.Name, fileParam.Path))
+			setFilesParameter = fmt.Sprintf("--set-file %v", strings.Join(fileKeyValueList,","))
+			}
+		}
+		
+		resetValuesParameter := ""
+		if params.ResetValues {
+			resetValuesParameter = fmt.Sprintf("%v --reset-values", resetValuesParameter)
+		}
+
 		log.Info().Msg("Showing template to be installed...")
-		foundation.RunCommand(ctx, "helm diff upgrade %v %v %v --namespace %v --allow-unreleased", params.ReleaseName, filename, overrideValuesFilesParameter, params.Namespace)
+		foundation.RunCommand(ctx, "helm diff upgrade %v %v %v %v %v --namespace %v --allow-unreleased", params.ReleaseName, filename, resetValuesParameter, overrideValuesFilesParameter, setFilesParameter, params.Namespace)
 
 		if params.Action == "install" {
 			log.Printf("\nInstalling chart and waiting for %v for it to be ready...\n", params.Timeout)
@@ -280,7 +309,7 @@ func main() {
 			if params.Force {
 				forceArgument = "--force"
 			}
-			err = foundation.RunCommandExtended(ctx, "helm upgrade --install %v %v %v --namespace %v --history-max 1 --cleanup-on-fail --atomic --timeout %v %v --create-namespace", params.ReleaseName, filename, overrideValuesFilesParameter, params.Namespace, params.Timeout, forceArgument)
+			err = foundation.RunCommandExtended(ctx, "helm upgrade --install %v %v %v %v %v --namespace %v --history-max 1 --cleanup-on-fail --atomic --timeout %v %v --create-namespace", params.ReleaseName, filename, resetValuesParameter, overrideValuesFilesParameter, setFilesParameter, params.Namespace, params.Timeout, forceArgument)
 			if err != nil {
 				log.Printf("Installation failed, showing logs...")
 				foundation.RunCommand(ctx, "kubectl get all,secret -n %v", params.Namespace)

@@ -23,6 +23,13 @@ type params struct {
 	Values                       string `json:"values,omitempty" yaml:"values,omitempty"`
 	ValuesFile                   string `json:"valuesFile,omitempty" yaml:"valuesFile,omitempty"`
 	Version                      string `json:"version,omitempty" yaml:"version,omitempty"`
+	FileParams             []FileParams `json:"files,omitempty" yaml:"files,omitempty"`
+	ResetValues                  bool   `json:"resetValues,omitempty" yaml:"resetValues,omitempty"`
+}
+
+type FileParams struct {
+	Name               string               `json:"name,omitempty" yaml:"name,omitempty"`
+	Path               string               `json:"path,omitempty" yaml:"path,omitempty"`
 }
 
 func (p *params) SetDefaults(gitName string, appLabel string, buildVersion string, releaseTargetName string, releaseAction string) {

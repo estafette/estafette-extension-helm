@@ -13,7 +13,7 @@ version:
 
 stages:
   build:
-    image: golang:1.20-alpine
+    image: golang:1.23-alpine
     env:
       CGO_ENABLED: 0
       GOOS: linux
@@ -29,17 +29,17 @@ stages:
     dontExpand:
     - PATH
     inline: |
-      FROM alpine:3.18
+      FROM alpine:3.21
 
       LABEL maintainer="estafette.io" \
             description="The ${ESTAFETTE_GIT_NAME} component is an Estafette extension to with linting, packaging, testing and adding Helm charts to repositories"
 
       ENV VERSION="${ESTAFETTE_BUILD_VERSION}" \
-          HELM_VERSION="v3.12.0" \
-          HELM_DIFF_VERSION="v3.8.1" \
+          HELM_VERSION="v3.17.0" \
+          HELM_DIFF_VERSION="v3.10.0" \
           HELM_GCS_VERSION="0.4.2" \
-          KUBECTL_VERSION="v1.24.3" \
-          CLOUD_SDK_VERSION="434.0.0-alpine"
+          KUBECTL_VERSION="v1.30.8" \
+          CLOUD_SDK_VERSION="503.0.0-alpine"
 
       RUN apk add --update --upgrade  --no-cache \
             git \
@@ -60,8 +60,11 @@ stages:
           && curl -L https://github.com/roboll/helmfile/releases/download/${HELMFILE_VERSION}/helmfile_linux_amd64 -o /usr/bin/helmfile \
           && chmod +x /usr/bin/helmfile \
           # install kubectl
-          && wget -O /usr/local/bin/kubectl https://storage.googleapis.com/kubernetes-release/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl \
+          && curl -L "https://dl.k8s.io/release/${KUBECTL_VERSION}/bin/linux/amd64/kubectl" --output /usr/local/bin/kubectl \
+          && curl -LO "https://dl.k8s.io/${KUBECTL_VERSION}/bin/linux/amd64/kubectl.sha256" \
+          && echo "$(cat kubectl.sha256)  /usr/local/bin/kubectl" | sha256sum -c - \
           && chmod +x /usr/local/bin/kubectl \
+          && kubectl version --client \
           # misc
           && mkdir -p ~/.kube \
           && apk del curl git openssl \
